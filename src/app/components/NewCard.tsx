@@ -4,22 +4,26 @@ import { use, useState } from "react"
 import { v4 as uuid } from "uuid"
 import { createCard, ICard } from "../db/db"
 import dayjs from "dayjs"
-import Tiptap from "@/app/components/tiptap"
+import Tiptap from "@/app/components/Tiptap"
 import theme from "@/theme"
 import Button from "@mui/material/Button"
 import { Typography, CardContent } from "@mui/material"
 import { useSearch } from "../(pages)/SearchContext"
-import { ContentCard, ContentWrapper } from "./item-card"
+import { ContentCard, ContentWrapper } from "./ItemCard"
 import * as Y from "yjs"
 
-const NewCard = () => {
+interface NewCardProps {
+  spaceId?: string
+}
+
+const NewCard = ({ spaceId }: NewCardProps) => {
   const [isEdited, setIsEdited] = useState(false)
   const [canPost, setCanPost] = useState(false)
   const [isEditorEmpty, setIsEditorEmpty] = useState(true)
   const [editorContent, setEditorContent] = useState("")
   const [editor, setEditor] = useState<any>(null) // Ny state för editor-instansen
   const { searchKeyword, setSearchKeyword } = useSearch()
-  const tempDoc = useState(()=>new Y.Doc())[0];
+  const tempDoc = useState(() => new Y.Doc())[0]
 
   // Funktion som körs när Ctrl+Enter eller Cmd+Enter trycks
   const handlePost = (yDoc: Y.Doc) => {
@@ -28,6 +32,7 @@ const NewCard = () => {
       type: "document",
       doc: yDoc,
       createdAt: dayjs().toISOString(),
+      spaceId: spaceId,
     } as ICard
 
     createCard(card)
@@ -70,7 +75,7 @@ const NewCard = () => {
               setCanPost={setCanPost}
               setIsEditorEmpty={setIsEditorEmpty}
               getContent={setEditorContent}
-              onPost={()=>handlePost(tempDoc)} // Skicka in handlePost-funktionen
+              onPost={() => handlePost(tempDoc)} // Skicka in handlePost-funktionen
               setEditor={setEditor} // Skicka in setEditor
             />
             {canPost && (

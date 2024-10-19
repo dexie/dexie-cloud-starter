@@ -1,65 +1,91 @@
-"use client";
+"use client"
 
-import Dexie, { Table } from "dexie";
-import dexieCloud, { defineYDocTrigger } from "dexie-cloud-addon";
-import { useLiveQuery } from "dexie-react-hooks";
-import * as Y from "yjs";
-import * as awarenessProtocol from "y-protocols/awareness";
-import { docToHtml } from "../lib/docToHtml";
-import { debounce } from "lodash";
-import { extractLunrKeywords } from "./search";
-import { query } from "../lib/query";
+import Dexie, { Table } from "dexie"
+import dexieCloud, {
+  DBRealmMember,
+  defineYDocTrigger,
+  getTiedRealmId,
+} from "dexie-cloud-addon"
+import { useLiveQuery } from "dexie-react-hooks"
+import * as Y from "yjs"
+import * as awarenessProtocol from "y-protocols/awareness"
+import { docToHtml } from "../lib/docToHtml"
+import { debounce } from "lodash"
+import { extractLunrKeywords } from "./search"
+import { query } from "../lib/query"
 
+export interface AutoSelectMember {
+  inputValue?: string
+  title: string
+  year?: number
+}
 export interface ICard {
-  id: string;
-  type: "image" | "text" | "document";
-  createdAt: string;
-  content?: string[];
-  doc: Y.Doc;
-  docHtml?: string;
-  fullTextIndex: string[];
-  description?: string;
-  realmId?: string;
-  owner?: string;
+  id: string
+  type: "image" | "text" | "document"
+  createdAt: string
+  content?: string[]
+  doc: Y.Doc
+  docHtml?: string
+  fullTextIndex: string[]
+  description?: string
+  realmId?: string
+  owner?: string
+  spaceId?: string
+}
+
+export interface ISpace {
+  id: string
+  title: string
+  createdAt: string
+  realmId?: string
+}
+
+export interface ISpaceList extends ISpace {
+  cards: ICard[]
 }
 
 export class DexieStarter extends Dexie {
-  card!: Table<ICard, string>;
+  card!: Table<ICard, string>
+  space!: Table<ISpace, string>
 
   constructor() {
     super("DexieStarter", {
       Y,
       //gc: false,
       addons: [dexieCloud],
-    });
+    })
 
     this.version(1).stores({
       card: `
         id,
         *fullTextIndex,
-        doc:Y`,
+        doc:Y,
+        spaceId`,
+      space: `
+        id,
+        title`,
       setting_local: "++id, key",
-    });
+    })
 
     // A trigger to set the docHtml string attribute from Y.Doc content
     defineYDocTrigger(this.card, "doc", async (ydoc, parentId) => {
-      console.log("Triggered", ydoc, parentId);
-      const html = docToHtml(ydoc as any);
+      console.log("Triggered", ydoc, parentId)
+      const html = docToHtml(ydoc as any)
       await this.card.update(parentId, {
         docHtml: html,
         fullTextIndex: extractLunrKeywords(html),
-      });
+      })
       //updateFullTextIndex({ html }, parentId);
-    });
+    })
 
     // A 5-seconds debounced function to update the full text search index
     const updateFullTextIndex = debounce(({ html, image }, parentId) => {
       if (html) {
         this.card.update(parentId, {
           fullTextIndex: extractLunrKeywords(html),
-        });
+        })
       }
-    }, 5000);
+    }, 5000)
 
     this.cloud.configure({
       databaseUrl:
@@ -89,43 +115,71 @@ export class DexieStarter extends Dexie {
         otpId: query.otpId?.toString(),
         otp: query.otp?.toString(),
       },
-    });
+    })
   }
 }
 
 export const createCard = async (card: ICard) => {
   try {
-    await db.card.add(card);
+    await db.card.add(card)
   } catch (e) {
-    console.error(e);
+    console.error(e)
   }
-};
+}
 
 export const updateCard = async (id: string, content: string) => {
   try {
-    await db.card.where("id").equals(id).modify({ description: content });
+    await db.card.where("id").equals(id).modify({ description: content })
   } catch (e) {
-    console.error(e);
+    console.error(e)
   }
-};
+}
 
 export const deleteCard = async (id: string) => {
   try {
-    await db.card.where("id").equals(id).delete();
+    await db.card.where("id").equals(id).delete()
   } catch (e) {
-    console.error(e);
+    console.error(e)
   }
-};
+}
 
-export const useLiveDataCards = (keyword: string): ICard[] => {
-  console.log("useLiveDataCards", keyword);
+export const createSpace = async (card: ISpace) => {
+  try {
+    await db.space.add(card)
+  } catch (e) {
+    console.error(e)
+  }
+}
+export const useLiveDataSpaces = (id?: string): ISpaceList[] => {
+  const spaces = useLiveQuery(async () => {
+    try {
+      const spaces = id
+        ? await db.space.where("id").equals(id).toArray()
+        : await db.space.limit(50).toArray()
+      const cards = await db.card.limit(10).toArray()
+      return spaces.map((space) => {
+        const spaceCards = cards.filter((card) => card.realmId === space.id)
+        return { ...space, cards: spaceCards }
+      })
+    } catch (e) {
+      return []
+    }
+  }, []) as ISpaceList[]
+
+  return spaces?.sort((a, b) => b.createdAt?.localeCompare(a.createdAt)) || []
+}
+
+export const useLiveDataCards = (
+  keyword: string,
+  spaceId?: string
+): ICard[] => {
   const cards = useLiveQuery(async () => {
     try {
-      if (!keyword) return await db.card.limit(50).toArray();
+      if (!keyword) return await db.card.limit(50).toArray()
 
-      const keywords = extractLunrKeywords(keyword);
-      if (keywords.length === 0) return [];
-      console.log("lunr keywords", keywords);
+      const keywords = extractLunrKeywords(keyword)
+      if (keywords.length === 0) return []
+      console.log("lunr keywords", keywords)
 
       if (keywords.length === 1) {
         // One keyword search:
@@ -133,10 +187,10 @@ export const useLiveDataCards = (keyword: string): ICard[] => {
           .where("fullTextIndex")
           .startsWith(keywords[0])
           .limit(50)
-          .toArray();
+          .toArray()
         return results
           .flat()
-          .filter((o, i, a) => a.findIndex((t) => t.id === o.id) === i);
+          .filter((o, i, a) => a.findIndex((t) => t.id === o.id) === i)
       } else {
         // Multi-keyword search.
         // 1) Get all primary keys for each keyword
@@ -144,62 +198,170 @@ export const useLiveDataCards = (keyword: string): ICard[] => {
           keywords.map((keyWord) =>
             db.card.where("fullTextIndex").startsWith(keyWord).primaryKeys()
           )
-        );
+        )
         // 2) Find the intersection of all primary keys
         const intersection = results.reduce((a, b) => {
-          const set = new Set(b);
-          return a.filter((k) => set.has(k));
-        });
+          const set = new Set(b)
+          return a.filter((k) => set.has(k))
+        })
         // 3) Get the cards for the intersection (max 50 cards)
-        return await db.card.bulkGet(intersection.slice(0, 50));
+        return await db.card.bulkGet(intersection.slice(0, 50))
       }
     } catch (e) {
-      return [];
+      return []
     }
-  }, [keyword]) as ICard[];
+  }, [keyword]) as ICard[]
 
-  return cards?.sort((a, b) => b.createdAt?.localeCompare(a.createdAt)) || [];
-};
+  return (
+    cards
+      ?.filter((c) => (spaceId ? c.spaceId === spaceId : true)) // NOTE(Bennie): Ask David too fix this and handle this the right way in query above.
+      ?.sort((a, b) => b.createdAt?.localeCompare(a.createdAt)) || []
+  )
+}
 
 export const getCardById = async (id: string): Promise<ICard | undefined> => {
   try {
-    return await db.card.where("id").equals(id).first();
+    return await db.card.where("id").equals(id).first()
   } catch (e) {
-    return;
+    return
   }
-};
+}
 
-let db: DexieStarter;
+export const useLiveSpaceMembers = (space?: ISpaceList): DBRealmMember[] => {
+  if (!space) return []
+
+  const members = useLiveQuery(async () => {
+    try {
+      const returnMembers = await db.members
+        .where("realmId")
+        .equals(space.realmId || "")
+        .toArray()
+
+      return returnMembers
+    } catch (e) {
+      return []
+    }
+  }, [space]) as DBRealmMember[]
+
+  return members
+}
+
+export const useLiveAllMembers = (): DBRealmMember[] => {
+  const members = useLiveQuery(() => {
+    try {
+      return db.members.toArray()
+    } catch (e) {
+      // console.log(e)
+      return []
+    }
+  }, []) as DBRealmMember[]
+
+  return members
+}
+
+export function shareTodoList(space: ISpace, ...friends: any[]) {
+  return db
+    .transaction(
+      "rw",
+      [db.card, db.space as any, db.realms as any, db.members as any],
+      () => {
+        // Add or update a realm, tied to the todo-list using getTiedRealmId():
+        const realmId = getTiedRealmId(space.id || "")
+        console.log("realmId", realmId)
+
+        db.realms
+          .put({
+            realmId,
+            name: space.title,
+            represents: "A shared space of inspiration",
+          })
+          .catch((e) => {
+            console.error("Error updating realm", e)
+          })
+
+        // Move todo-list into the realm (if not already there):
+        db.space
+          .update(
+            space.id as any,
+            {
+              realmId,
+            } as any
+          )
+          .catch((e) => {
+            console.error("Error updating space", e)
+          })
+
+        db.card
+          .where("spaceId")
+          .equals(space.id)
+          .modify({
+            realmId,
+          })
+          .catch((e) => {
+            console.error("Error updating card", e)
+          })
+
+        // Add the members to share it to:
+        db.members
+          .bulkAdd(
+            friends.map((friend) => ({
+              realmId,
+              email: friend.email,
+              name: friend.name,
+              invite: true,
+              permissions: {
+                manage: "*", // Give your friend full permissions within this new realm.
+              },
+            }))
+          )
+          .catch((e) => {
+            console.error("Error updating members", e)
+          })
+      }
+    )
+    .catch((e) => {
+      console.error(e)
+    })
+}
+
+export function unshareTodoList(object: any, members: any[]) {
+  return db.members
+    .where("[email+realmId]")
+    .anyOf(members.map((member) => [member.email, object.realmId]))
+    .delete()
+}
+
+let db: DexieStarter
 
 try {
-  db = new DexieStarter();
-  console.log("Database initialized successfully");
+  db = new DexieStarter()
+  console.log("Database initialized successfully")
 } catch (error) {
-  console.error("Failed to initialize the database:", error);
+  console.error("Failed to initialize the database:", error)
 }
 
 const initializeDatabase = async () => {
   try {
     db.on("blocked", (blocked: any) => {
       const errorMessage =
-        "Database upgrade blocked. Please close other open tabs using this app.";
-      console.error(errorMessage, blocked);
-    });
+        "Database upgrade blocked. Please close other open tabs using this app."
+      console.error(errorMessage, blocked)
+    })
 
-    console.log("Database initialized and ready event subscribed.");
+    console.log("Database initialized and ready event subscribed.")
   } catch (error) {
-    let errorMessage = "Failed to initialize the database.";
+    let errorMessage = "Failed to initialize the database."
     if (error instanceof Error) {
-      errorMessage = error.message;
+      errorMessage = error.message
     }
-    console.error(errorMessage, error);
+    console.error(errorMessage, error)
   }
-};
+}
 
 // Starta databasen om vi är i en webbläsarmiljö
 if (typeof window !== "undefined") {
-  initializeDatabase();
+  initializeDatabase()
 }
 
 // Exportera databasens instans
-export { db };
+export { db }

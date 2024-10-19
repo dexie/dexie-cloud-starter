@@ -3,10 +3,9 @@ import { useEditor, EditorContent, Extensions } from "@tiptap/react"
 import Placeholder from "@tiptap/extension-placeholder"
 import StarterKit from "@tiptap/starter-kit"
 import { CSSProperties, useEffect, useMemo, useRef } from "react"
-import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight"
 import { common, createLowlight } from "lowlight"
-import Collaboration from "@tiptap/extension-collaboration";
-import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
+import Collaboration from "@tiptap/extension-collaboration"
+import CollaborationCursor from "@tiptap/extension-collaboration-cursor"
 import * as Y from "yjs"
 import { useDocument, useObservable } from "dexie-react-hooks"
 import { db } from "../db/db"
@@ -36,11 +35,11 @@ const Tiptap = ({
   onPost,
   setEditor, // Mottag setEditor-funktionen
 }: EditorProps) => {
-  const currentUser = useObservable(db.cloud.currentUser);
+  const currentUser = useObservable(db.cloud.currentUser)
   const collaborationColor = useMemo(
     () => randomCollaborationColor(currentUser?.userId),
     [currentUser?.userId]
-  );
+  )
 
   const extensions: Extensions = [
     ...commonTiptapExtensions,
@@ -49,17 +48,18 @@ const Tiptap = ({
     }),
     Collaboration.configure({
       document: yDoc,
-    })
-  ];
+    }),
+  ]
   if (provider) {
     extensions.push(
       CollaborationCursor.configure({
         provider,
         user: {
-          name: currentUser?.name || 'Anonymous',
+          name: currentUser?.name || "Anonymous",
           color: collaborationColor,
         },
-    }));
+      })
+    )
   }
 
   const editor = useEditor({
@@ -88,7 +88,7 @@ const Tiptap = ({
 
         // Jämför nuvarande innehåll med initialContent
         const currentContent = editor.getHTML()
-        const isModified = true;//currentContent !== initialContent.current
+        const isModified = true //currentContent !== initialContent.current
 
         setIsEdited(isModified)
         setCanPost(!isEditorEmpty && isModified)
@@ -110,16 +110,15 @@ const Tiptap = ({
 
 export default Tiptap
 
-
 function randomCollaborationColor(userId: string | undefined) {
-  const colors = ['#FF5733', '#33FF57', '#3357FF', '#F333FF'];
+  const colors = ["#FF5733", "#33FF57", "#3357FF", "#F333FF"]
   if (userId) {
     return colors[
       (userId.charCodeAt(0) +
         (userId.charCodeAt(3) || 0) +
         (userId.charCodeAt(5) || 0)) %
         colors.length
-    ];
+    ]
   }
-  return colors[0];
+  return colors[0]
 }

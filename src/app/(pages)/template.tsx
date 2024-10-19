@@ -17,12 +17,14 @@ import { ReactNode, useEffect } from "react"
 import { db } from "../db/db"
 import React from "react"
 import { SearchProvider, useSearch } from "./SearchContext"
-
+import { NavItem } from "../components/NavItem"
+import { deleteUserAccount } from "../lib/delete-account"
+import PersonRemoveIcon from "@mui/icons-material/PersonRemove"
 // TODO: Seems this component is not used in the project. Can we remove it or is it planned to be used?
 export default function Template({ children }: { children: ReactNode }) {
   const router = useRouter()
 
-  const dexieCloudUser = useObservable(db.cloud.currentUser) || {
+  const dexieCloudUser = useObservable(db?.cloud?.currentUser) || {
     userId: "unauthorized",
     email: "",
   }
@@ -53,38 +55,9 @@ export default function Template({ children }: { children: ReactNode }) {
             }}
           >
             <SearchField />
-            <Typography
-              variant="body1"
-              sx={{
-                mx: 2,
-                pt: 1,
-                borderTop: `solid 4px ${theme.palette.primary.main}`,
-                fontSize: "1.2rem", // Större textstorlek vid aktivt val
-              }}
-              color="primary"
-            >
-              Everything
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{
-                mx: 2,
-                borderTop: `solid 4px transparent`,
-                pt: 1,
-              }}
-            >
-              Spaces
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{
-                mx: 2,
-                borderTop: `solid 4px transparent`,
-                pt: 1,
-              }}
-            >
-              Serendipity
-            </Typography>
+            <NavItem name="Everything" href="/everything" />
+            <NavItem name="Spaces" href="/spaces" />
+            <NavItem name="Serendipity" href="/serendipity" />
 
             <Typography
               variant="body1"
@@ -98,6 +71,20 @@ export default function Template({ children }: { children: ReactNode }) {
               }}
             >
               <HistoryIcon />
+            </Typography>
+
+            <Typography
+              variant="body1"
+              sx={{
+                mx: 2,
+                borderTop: `solid 4px transparent`,
+                pt: 1,
+              }}
+              onClick={() => {
+                deleteUserAccount(dexieCloudUser as any, router)
+              }}
+            >
+              <PersonRemoveIcon />
             </Typography>
           </Toolbar>
         </AppBar>

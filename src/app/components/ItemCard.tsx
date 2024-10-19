@@ -9,8 +9,8 @@ import { styled } from "@mui/material/styles"
 import { ICard } from "../db/db"
 
 // Definiera höjdgränser
-const HEIGHT_THRESHOLD = 500 // px - Innehållshöjd för skalning
-const FIXED_HEIGHT = 200 // px - Fast höjd när skalning appliceras
+export const HEIGHT_THRESHOLD = 500 // px - Innehållshöjd för skalning
+export const FIXED_HEIGHT = 200 // px - Fast höjd när skalning appliceras
 
 // Styled ContentCard med dynamisk höjd och overflow hantering
 export const ContentCard = styled("div")<{ isScaled: boolean }>(
@@ -60,7 +60,7 @@ const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
   }, [scaleFactor])*/
 
   const handleClick = () => {
-    router.push(`/everything?edit=${item.id}`)
+    router.push(`?edit=${item.id}`)
   }
 
   useEffect(() => {
