@@ -1,20 +1,19 @@
 "use client"
+
 import { useEditor, EditorContent, Extensions } from "@tiptap/react"
 import Placeholder from "@tiptap/extension-placeholder"
-import StarterKit from "@tiptap/starter-kit"
-import { CSSProperties, useEffect, useMemo, useRef } from "react"
-import { common, createLowlight } from "lowlight"
+import { CSSProperties, useEffect, useMemo } from "react"
 import Collaboration from "@tiptap/extension-collaboration"
 import CollaborationCursor from "@tiptap/extension-collaboration-cursor"
 import * as Y from "yjs"
-import { useDocument, useObservable } from "dexie-react-hooks"
+import { useObservable } from "dexie-react-hooks"
 import { db } from "../db/db"
 import { DexieYProvider } from "dexie"
 import { commonTiptapExtensions } from "../lib/common-tiptap-extensions"
 
 interface EditorProps {
   yDoc?: Y.Doc
-  provider?: DexieYProvider | null
+  provider?: DexieYProvider<Y.Doc> | null
   style?: CSSProperties
   setIsEdited: (edited: boolean) => void
   setCanPost: (canPost: boolean) => void
@@ -35,6 +34,9 @@ const Tiptap = ({
   onPost,
   setEditor, // Mottag setEditor-funktionen
 }: EditorProps) => {
+  // console.log("provider tiptap component", provider)
+  console.log("yDoc tiptap component", yDoc)
+
   const currentUser = useObservable(db.cloud.currentUser)
   const collaborationColor = useMemo(
     () => randomCollaborationColor(currentUser?.userId),
@@ -50,6 +52,7 @@ const Tiptap = ({
       document: yDoc,
     }),
   ]
+
   if (provider) {
     extensions.push(
       CollaborationCursor.configure({

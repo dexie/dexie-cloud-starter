@@ -13,7 +13,6 @@ import {
 import Dialog from "@mui/material/Dialog"
 import DialogContent from "@mui/material/DialogContent"
 import theme from "@/theme"
-import Tiptap from "@/app/components/tiptap"
 import { Suspense, useEffect, useState } from "react"
 import Masonry from "react-masonry-css"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
@@ -38,6 +37,14 @@ import {
 import Link from "next/link"
 import { filter, uniqWith } from "lodash"
 import ShareUserRow from "./SharedUserRow"
+import dynamic from "next/dynamic"
+
+const Tiptap = dynamic(
+  () => import("../components/Tiptap").then((mod) => mod.default),
+  {
+    ssr: false,
+  }
+)
 
 const breakpointColumnsObj = {
   default: 4,
@@ -72,25 +79,13 @@ export default function CardList({
   const [addFriendValue, setAddFriendValue] = useState<AutoSelectMember | null>(
     null
   )
-  const members = useLiveSpaceMembers(space)
+  const members = [] as any[] // useLiveSpaceMembers(space)
   const allMembers = useLiveSpaceMembers()
-  const [dexieCloudUser, setDexieCloudUser] = useState({
+
+  const dexieCloudUser = useObservable(db.cloud.currentUser) || {
     userId: "unauthorized",
     email: "",
-  })
-
-  useEffect(() => {
-    const subscription = db.cloud.currentUser.subscribe((user) => {
-      if (user) {
-        setDexieCloudUser({
-          userId: user.userId || "unauthorized",
-          email: user.email || "",
-        })
-      }
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
+  }
 
   useEffect(() => {
     const modalParam = searchParams.get("edit")
@@ -103,6 +98,7 @@ export default function CardList({
     [isModalEdit]
   )
   const provider = useDocument(rowBeingEdited?.doc)
+  console.log("provider useDocument", provider)
 
   const closeModal = () => {
     setIsModalEdit(undefined)
@@ -340,9 +336,14 @@ export default function CardList({
                 // Regular option
                 return option.title
               }}
-              renderOption={(props, option) => (
-                <li {...props}>{option.title}</li>
-              )}
+              renderOption={(props, option) => {
+                const { key, ...restProps } = props
+                return (
+                  <li key={key || option.title} {...restProps}>
+                    {option.title}
+                  </li>
+                )
+              }}
               fullWidth
               freeSolo
               renderInput={(params) => (

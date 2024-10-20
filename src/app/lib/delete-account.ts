@@ -8,10 +8,10 @@ export const deleteUserAccount = async (
 ) => {
   if (!user?.userId) return // Safety check
 
-  const confirmed = confirm(`
-      Are you sure you want to delete your user completely along all stored 
-      data for ${user?.userId}?
-      Private data will be deleted. Shared data will not be deleted. This action cannot be undone.`)
+  const confirmed =
+    confirm(`Are you sure you want to delete your user completely along all stored data for ${user?.userId}?
+    
+Private data will be deleted. Shared data will not be deleted. This action cannot be undone.`)
 
   if (!confirmed) return
 

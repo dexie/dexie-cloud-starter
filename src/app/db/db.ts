@@ -267,7 +267,6 @@ export function shareTodoList(space: ISpace, ...friends: any[]) {
       () => {
         // Add or update a realm, tied to the todo-list using getTiedRealmId():
         const realmId = getTiedRealmId(space.id || "")
-        console.log("realmId", realmId)
 
         db.realms
           .put({
@@ -279,10 +278,9 @@ export function shareTodoList(space: ISpace, ...friends: any[]) {
             console.error("Error updating realm", e)
           })
 
-        // Move todo-list into the realm (if not already there):
         db.space
           .update(
-            space.id as any,
+            realmId as any,
             {
               realmId,
             } as any
