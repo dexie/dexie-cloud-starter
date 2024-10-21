@@ -98,7 +98,6 @@ export default function CardList({
     [isModalEdit]
   )
   const provider = useDocument(rowBeingEdited?.doc)
-  console.log("provider useDocument", provider)
 
   const closeModal = () => {
     setIsModalEdit(undefined)

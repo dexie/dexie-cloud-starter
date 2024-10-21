@@ -34,9 +34,6 @@ const Tiptap = ({
   onPost,
   setEditor, // Mottag setEditor-funktionen
 }: EditorProps) => {
-  // console.log("provider tiptap component", provider)
-  console.log("yDoc tiptap component", yDoc)
-
   const currentUser = useObservable(db.cloud.currentUser)
   const collaborationColor = useMemo(
     () => randomCollaborationColor(currentUser?.userId),

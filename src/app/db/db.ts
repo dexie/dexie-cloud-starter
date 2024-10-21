@@ -231,9 +231,9 @@ export const getCardById = async (id: string): Promise<ICard | undefined> => {
 }
 
 export const useLiveSpaceMembers = (space?: ISpaceList): DBRealmMember[] => {
-  if (!space) return []
-
   const members = useLiveQuery(async () => {
+    if (!space) return []
+
     try {
       const returnMembers = await db.members
         .where("realmId")
@@ -270,12 +270,7 @@ export function shareSpaceList(space: ISpace, ...friends: any[]) {
       () => {
         // Add or update a realm, tied to the todo-list using getTiedRealmId():
         const realmId = getTiedRealmId(space.id || "")
-
         space.realmId = realmId
-
-        console.log("space", space)
-        console.log("realmId", realmId)
-        console.log("friends", friends)
 
         db.realms
           .put({
@@ -286,6 +281,10 @@ export function shareSpaceList(space: ISpace, ...friends: any[]) {
           .catch((e) => {
             console.error("Error updating realm", e)
           })
+
+        db.space.update(space.id, { realmId }).catch((e) => {
+          console.error("Error updating space", e)
+        })
 
         db.card
           .where("spaceId")
