@@ -120,6 +120,9 @@ export class DexieStarter extends Dexie {
 }
 
 export const createCard = async (card: ICard) => {
+  const realmId = getTiedRealmId(card.spaceId || "")
+  card.realmId = realmId
+
   try {
     await db.card.add(card)
   } catch (e) {
