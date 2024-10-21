@@ -67,6 +67,7 @@ const Tiptap = ({
 
   const editor = useEditor({
     extensions,
+    immediatelyRender: false, // Fix SSR hydration issue
     editorProps: {
       handleKeyDown(view: any, event: any) {
         // Kolla om Cmd+Enter eller Ctrl+Enter har tryckts
