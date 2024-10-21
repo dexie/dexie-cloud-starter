@@ -1,3 +1,5 @@
+"use client"
+
 import { FC } from "react"
 import { alpha, Avatar, SxProps, Theme, useTheme } from "@mui/material"
 import { hexify, invertColor, stringToColor } from "../lib/color-handling"

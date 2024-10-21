@@ -1,3 +1,5 @@
+"use client"
+
 import { useObservable } from "dexie-react-hooks"
 import { useState } from "react"
 import dayjs from "dayjs"

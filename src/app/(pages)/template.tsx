@@ -6,7 +6,6 @@ import {
   Typography,
   TextField,
   Container,
-  Badge,
   Box,
 } from "@mui/material"
 import theme from "@/theme"
@@ -22,10 +21,8 @@ import { NavItem } from "../components/NavItem"
 import { deleteUserAccount } from "../lib/delete-account"
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove"
 import LogoutIcon from "@mui/icons-material/Logout"
-import Link from "next/link"
-import NotificationsIcon from "@mui/icons-material/Notifications"
 import { InviteAlert } from "../components/InviteAlert"
-// TODO: Seems this component is not used in the project. Can we remove it or is it planned to be used?
+
 export default function Template({ children }: { children: ReactNode }) {
   const router = useRouter()
 

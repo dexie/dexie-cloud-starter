@@ -4,16 +4,17 @@ import { useObservable } from "dexie-react-hooks"
 import { Badge } from "@mui/material"
 import NotificationsIcon from "@mui/icons-material/Notifications"
 import { db } from "../db/db"
+import { useState, useEffect } from "react"
 
 const InviteAlert = () => {
-  const currentUser = useObservable(db.cloud.currentUser)
   const allInvites = useObservable(db.cloud.invites)
-  const invites = allInvites?.filter((i) => !i.accepted && !i.rejected)
+  const [invites, setInvites] = useState<any[]>([])
 
-  if (!currentUser) return null
-
-  //   if (!invites || invites.length == 0) return <></>
-  console.log("invites", invites)
+  useEffect(() => {
+    if (allInvites) {
+      setInvites(allInvites.filter((i) => !i.accepted && !i.rejected))
+    }
+  }, [allInvites])
 
   return (
     <>
