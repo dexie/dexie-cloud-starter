@@ -27,8 +27,8 @@ import {
   AutoSelectMember,
   db,
   deleteCard,
-  shareTodoList,
-  unshareTodoList,
+  shareSpaceList,
+  unshareSpaceList,
   updateCard,
   useLiveDataCards,
   useLiveDataSpaces,
@@ -118,7 +118,7 @@ export default function CardList({
     if (!friend || !members) return
     if (members.find((m) => m.email == friend.toLowerCase().trim())) return
 
-    shareTodoList(space, {
+    shareSpaceList(space, {
       name: friend.split("@")[0],
       email: friend.toLowerCase().trim(),
     })
@@ -130,7 +130,7 @@ export default function CardList({
     const members = []
     members.push(member)
 
-    unshareTodoList(space, members)
+    unshareSpaceList(space, members)
   }
 
   if (!cards) {

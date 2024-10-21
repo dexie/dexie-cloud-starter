@@ -1,25 +1,10 @@
 "use client"
 
-import {
-  Box,
-  CircularProgress,
-  Chip,
-  Button,
-  Typography,
-  alpha,
-  TextField,
-} from "@mui/material"
+import { Box, Typography } from "@mui/material"
 import { v4 as uuid } from "uuid"
-import BookmarksIcon from "@mui/icons-material/Bookmarks"
-import Dialog from "@mui/material/Dialog"
-import DialogContent from "@mui/material/DialogContent"
 import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import WorkspacesIcon from "@mui/icons-material/Workspaces"
+import { useRouter } from "next/navigation"
 import dayjs from "dayjs"
-import ItemCard, { FIXED_HEIGHT } from "@/app/components/ItemCard"
-import theme from "@/theme"
-import Link from "next/link"
 import { createSpace, useLiveDataCards, useLiveDataSpaces } from "@/app/db/db"
 import { useSearch } from "../../SearchContext"
 import CardList from "@/app/components/CardList"

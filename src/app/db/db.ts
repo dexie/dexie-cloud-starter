@@ -262,7 +262,7 @@ export const useLiveAllMembers = (): DBRealmMember[] => {
   return members
 }
 
-export function shareTodoList(space: ISpace, ...friends: any[]) {
+export function shareSpaceList(space: ISpace, ...friends: any[]) {
   return db
     .transaction(
       "rw",
@@ -270,6 +270,12 @@ export function shareTodoList(space: ISpace, ...friends: any[]) {
       () => {
         // Add or update a realm, tied to the todo-list using getTiedRealmId():
         const realmId = getTiedRealmId(space.id || "")
+
+        space.realmId = realmId
+
+        console.log("space", space)
+        console.log("realmId", realmId)
+        console.log("friends", friends)
 
         db.realms
           .put({
@@ -279,17 +285,6 @@ export function shareTodoList(space: ISpace, ...friends: any[]) {
           })
           .catch((e) => {
             console.error("Error updating realm", e)
-          })
-
-        db.space
-          .update(
-            realmId as any,
-            {
-              realmId,
-            } as any
-          )
-          .catch((e) => {
-            console.error("Error updating space", e)
           })
 
         db.card
@@ -325,7 +320,7 @@ export function shareTodoList(space: ISpace, ...friends: any[]) {
     })
 }
 
-export function unshareTodoList(object: any, members: any[]) {
+export function unshareSpaceList(object: any, members: any[]) {
   return db.members
     .where("[email+realmId]")
     .anyOf(members.map((member) => [member.email, object.realmId]))
