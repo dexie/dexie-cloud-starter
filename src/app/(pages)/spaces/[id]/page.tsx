@@ -8,6 +8,7 @@ import dayjs from "dayjs"
 import { createSpace, useLiveDataCards, useLiveDataSpaces } from "@/app/db/db"
 import { useSearch } from "../../SearchContext"
 import CardList from "@/app/components/CardList"
+import Avatars from "@/app/components/Avatars"
 interface PageProps {
   params: {
     id: string
@@ -16,26 +17,9 @@ interface PageProps {
 
 export default function Spaces({ params }: PageProps) {
   const { id } = params
-
-  const router = useRouter()
   const { searchKeyword } = useSearch()
-  const [isModalEdit, setIsModalEdit] = useState<string | undefined>(undefined)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [newSpaceName, setNewSpaceName] = useState("")
 
   const space = useLiveDataSpaces(id)[0]
-  const cards = useLiveDataCards(searchKeyword, id)
-
-  const handlePost = () => {
-    // Skapa en ny space
-    // Stäng modalen
-    createSpace({
-      id: uuid(),
-      title: newSpaceName,
-      createdAt: dayjs().toISOString(),
-    })
-    setIsModalOpen(false)
-  }
 
   if (!space) {
     return (

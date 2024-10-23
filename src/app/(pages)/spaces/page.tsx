@@ -22,6 +22,7 @@ import dayjs from "dayjs"
 import ItemCard, { FIXED_HEIGHT } from "@/app/components/ItemCard"
 import theme from "@/theme"
 import Link from "next/link"
+import Avatars from "@/app/components/Avatars"
 export default function Spaces() {
   const router = useRouter()
   const { searchKeyword } = useSearch()
@@ -84,8 +85,12 @@ export default function Spaces() {
                 gap: "10px",
                 padding: "10px",
                 borderRadius: "6px",
+                position: "relative",
               }}
             >
+              <Box sx={{ position: "absolute", right: 15, top: 15 }}>
+                <Avatars realmId={space?.realmId as string} compact />
+              </Box>
               <Box
                 sx={{
                   minHeight: FIXED_HEIGHT,
