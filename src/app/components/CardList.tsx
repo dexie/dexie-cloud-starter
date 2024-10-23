@@ -321,22 +321,22 @@ export default function CardList({
                 uniqWith(
                   allMembers,
                   (a, b) =>
-                    (a.email || "").toLowerCase().trim() ===
-                    (b.email || "").toLowerCase().trim()
+                    (a.userId || "").toLowerCase().trim() ===
+                    (b.userId || "").toLowerCase().trim()
                 )
                   ?.filter(
                     (m) =>
-                      m.email &&
-                      members?.map((i) => i.email).indexOf(m.email) == -1
+                      m.userId &&
+                      members?.map((i) => i.userId).indexOf(m.userId) == -1
                   )
                   .sort((a, b) => {
-                    a.email = a.email || ""
-                    b.email = b.email || ""
-                    return a.email.localeCompare(b.email)
+                    a.userId = a.userId || ""
+                    b.userId = b.userId || ""
+                    return a.userId.localeCompare(b.userId)
                   })
                   .map((member) => {
                     return {
-                      title: member.email,
+                      title: member.userId,
                     }
                   }) || []
               }
