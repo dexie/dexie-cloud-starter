@@ -38,6 +38,7 @@ import Link from "next/link"
 import { filter, uniqWith } from "lodash"
 import ShareUserRow from "./SharedUserRow"
 import dynamic from "next/dynamic"
+import Avatars from "./Avatars"
 
 const Tiptap = dynamic(
   () => import("../components/Tiptap").then((mod) => mod.default),
@@ -99,10 +100,6 @@ export default function CardList({
   )
   const provider = useDocument(rowBeingEdited?.doc)
 
-  provider?.awareness.on("change", (changes) => {
-    console.log("DAVID:(PROVIDER) Awareness Changes", changes)
-  })
-
   const closeModal = () => {
     setIsModalEdit(undefined)
     router.push(pathname)
@@ -140,7 +137,7 @@ export default function CardList({
     return <CircularProgress />
   }
 
-  console.log("DAVID: Render CardList", provider)
+  console.log("Rendering CardList", space)
 
   return (
     <>
@@ -165,8 +162,27 @@ export default function CardList({
               </Link>
               <Typography variant="h5">{space?.title}</Typography>
             </Box>
-            <Box>
-              <GroupIcon onClick={() => setShowShareDialogOpen(true)} />
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                gap: 1,
+              }}
+            >
+              <Avatars realmId={space?.realmId as string} compact />
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  cursor: "pointer",
+                }}
+                onClick={() => setShowShareDialogOpen(true)}
+              >
+                <GroupIcon />
+                Share
+              </Box>
             </Box>
           </Box>
           <Divider
@@ -269,17 +285,10 @@ export default function CardList({
               value={addFriendValue}
               onChange={(event, newValue: any) => {
                 if (typeof newValue === "string") {
-                  // setAddFriendValue({
-                  //   title: newValue,
-                  // })
                   shareProject(newValue)
                 } else if (newValue && newValue.inputValue) {
-                  // setAddFriendValue({
-                  //   title: newValue.inputValue,
-                  // })
                   shareProject(newValue.inputValue)
                 } else {
-                  // setAddFriendValue(newValue)
                   shareProject(newValue.title)
                 }
                 setAddFriendValue(null)

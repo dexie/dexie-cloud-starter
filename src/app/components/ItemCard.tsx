@@ -3,10 +3,12 @@
 "use client"
 
 import React, { useRef, useState, useEffect, use } from "react"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { CardContent, Typography, CardMedia } from "@mui/material"
 import { styled } from "@mui/material/styles"
 import { ICard } from "../db/db"
+import Avatars from "./Avatars"
+import { Box } from "@mui/system"
 
 // Definiera höjdgränser
 export const HEIGHT_THRESHOLD = 500 // px - Innehållshöjd för skalning
@@ -51,6 +53,9 @@ interface ItemCardProps {
 
 const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
   const router = useRouter()
+  const pathname = usePathname()
+  const isOnEverythingPage = pathname.startsWith("/everything")
+
   const contentRef = useRef<HTMLDivElement>(null)
   const [isScaled, setIsScaled] = useState(false)
   const [scaleFactor, setScaleFactor] = useState(1)
@@ -84,6 +89,11 @@ const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
       tabIndex={0}
       aria-label={`Edit item ${item.id}`}
     >
+      {isOnEverythingPage && (
+        <Box sx={{ position: "absolute", right: 10, top: 10 }}>
+          <Avatars realmId={item.realmId as string} compact />
+        </Box>
+      )}
       <ContentWrapper scaleFactor={scaleFactor}>
         <div ref={contentRef}>
           {(item.type === "text" || item.type === "document") && (

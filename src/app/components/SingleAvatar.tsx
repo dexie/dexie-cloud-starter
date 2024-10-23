@@ -21,7 +21,7 @@ const SingleAvatar: FC<AvatarProp> = ({ member, sx }) => {
       sx={{
         opacity: member.accepted ? 1 : 0.15,
         bgcolor: hexify(
-          alpha(stringToColor(member.email), 0.8),
+          alpha(stringToColor(member.email), 0.5),
           alpha(theme.palette.background.default, 1)
         ),
         width: 24,
