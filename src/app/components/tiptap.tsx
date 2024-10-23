@@ -1,6 +1,7 @@
 "use client"
 
 import { useEditor, EditorContent, Extensions } from "@tiptap/react"
+import { alpha } from "@mui/material"
 import Placeholder from "@tiptap/extension-placeholder"
 import { CSSProperties, useEffect, useMemo } from "react"
 import Collaboration from "@tiptap/extension-collaboration"
@@ -10,6 +11,8 @@ import { useObservable } from "dexie-react-hooks"
 import { db } from "../db/db"
 import { DexieYProvider } from "dexie"
 import { commonTiptapExtensions } from "../lib/common-tiptap-extensions"
+import theme from "@/theme"
+import { hexify, stringToColor } from "../lib/color-handling"
 
 interface EditorProps {
   yDoc?: Y.Doc
@@ -34,10 +37,14 @@ const Tiptap = ({
   onPost,
   setEditor, // Mottag setEditor-funktionen
 }: EditorProps) => {
-  console.log("DAVID: Start of Tiptap component")
   const currentUser = useObservable(db.cloud.currentUser)
+
   const collaborationColor = useMemo(
-    () => randomCollaborationColor(currentUser?.userId),
+    () =>
+      hexify(
+        alpha(stringToColor(currentUser?.userId || ""), 0.3),
+        alpha(theme.palette.background.default, 1)
+      ),
     [currentUser?.userId]
   )
 
@@ -50,10 +57,8 @@ const Tiptap = ({
       document: yDoc,
     }),
   ]
-  console.log("DAVID: CollaborationCursor.configure pre if", provider)
 
   if (provider) {
-    console.log("DAVID: CollaborationCursor.configure", provider)
     extensions.push(
       CollaborationCursor.configure({
         provider,
@@ -64,8 +69,6 @@ const Tiptap = ({
       })
     )
   }
-
-  console.log("DAVID: Extensions", extensions)
 
   const editor = useEditor({
     extensions,
@@ -115,16 +118,3 @@ const Tiptap = ({
 }
 
 export default Tiptap
-
-function randomCollaborationColor(userId: string | undefined) {
-  const colors = ["#FF5733", "#33FF57", "#3357FF", "#F333FF"]
-  if (userId) {
-    return colors[
-      (userId.charCodeAt(0) +
-        (userId.charCodeAt(3) || 0) +
-        (userId.charCodeAt(5) || 0)) %
-        colors.length
-    ]
-  }
-  return colors[0]
-}
