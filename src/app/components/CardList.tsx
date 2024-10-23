@@ -13,7 +13,7 @@ import {
 import Dialog from "@mui/material/Dialog"
 import DialogContent from "@mui/material/DialogContent"
 import theme from "@/theme"
-import { Suspense, useEffect, useState } from "react"
+import { Suspense, use, useEffect, useState } from "react"
 import Masonry from "react-masonry-css"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline"
@@ -99,6 +99,10 @@ export default function CardList({
   )
   const provider = useDocument(rowBeingEdited?.doc)
 
+  provider?.awareness.on("change", (changes) => {
+    console.log("DAVID:(PROVIDER) Awareness Changes", changes)
+  })
+
   const closeModal = () => {
     setIsModalEdit(undefined)
     router.push(pathname)
@@ -135,6 +139,8 @@ export default function CardList({
   if (!cards) {
     return <CircularProgress />
   }
+
+  console.log("DAVID: Render CardList", provider)
 
   return (
     <>

@@ -34,6 +34,7 @@ const Tiptap = ({
   onPost,
   setEditor, // Mottag setEditor-funktionen
 }: EditorProps) => {
+  console.log("DAVID: Start of Tiptap component")
   const currentUser = useObservable(db.cloud.currentUser)
   const collaborationColor = useMemo(
     () => randomCollaborationColor(currentUser?.userId),
@@ -49,8 +50,10 @@ const Tiptap = ({
       document: yDoc,
     }),
   ]
+  console.log("DAVID: CollaborationCursor.configure pre if", provider)
 
   if (provider) {
+    console.log("DAVID: CollaborationCursor.configure", provider)
     extensions.push(
       CollaborationCursor.configure({
         provider,
@@ -61,6 +64,8 @@ const Tiptap = ({
       })
     )
   }
+
+  console.log("DAVID: Extensions", extensions)
 
   const editor = useEditor({
     extensions,
