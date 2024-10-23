@@ -21,8 +21,6 @@ export const NavItem = ({ name, href }: NavItemProps) => {
   const router = useRouter()
   const pathname = usePathname()
 
-  console.log("pathname", pathname)
-
   return (
     <Link href={href}>
       <Typography

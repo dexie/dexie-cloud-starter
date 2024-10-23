@@ -60,10 +60,6 @@ const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
   const [isScaled, setIsScaled] = useState(false)
   const [scaleFactor, setScaleFactor] = useState(1)
 
-  /*useEffect(() => {
-    console.log("ItemCard rendered", scaleFactor)
-  }, [scaleFactor])*/
-
   const handleClick = () => {
     router.push(`?edit=${item.id}`)
   }

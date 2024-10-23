@@ -85,12 +85,12 @@ const ShareUserRow = ({ deleteAction, member, space }: ShareUserRowProps) => {
           }}
         >
           {member.userId == dexieCloudUser.email
-            ? `${"Skapad"} ${space?.createdAt}`
+            ? `${"Created"} ${dayjs(space?.createdAt).toISOString()}`
             : member.rejected
-              ? `${"Rejected"} ${member.rejected}`
+              ? `${"Rejected"} ${dayjs(member.rejected).toISOString()}`
               : member.accepted
-                ? `${"Accepted"} ${member.invitedDate}`
-                : `${"Invite sent"} ${member.invitedDate}`}
+                ? `${"Accepted"} ${dayjs(member.invitedDate).toISOString()}`
+                : `${"Invite sent"} ${dayjs(member.invitedDate).toISOString()}`}
         </Box>
       </Box>
       <Box

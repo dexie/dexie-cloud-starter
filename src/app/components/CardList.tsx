@@ -9,6 +9,7 @@ import {
   Autocomplete,
   Divider,
   TextField,
+  createFilterOptions,
 } from "@mui/material"
 import Dialog from "@mui/material/Dialog"
 import DialogContent from "@mui/material/DialogContent"
@@ -30,12 +31,13 @@ import {
   shareSpaceList,
   unshareSpaceList,
   updateCard,
+  useLiveAllMembers,
   useLiveDataCards,
   useLiveDataSpaces,
   useLiveSpaceMembers,
 } from "../db/db"
 import Link from "next/link"
-import { filter, uniqWith } from "lodash"
+import { uniqWith } from "lodash"
 import ShareUserRow from "./SharedUserRow"
 import dynamic from "next/dynamic"
 import Avatars from "./Avatars"
@@ -59,6 +61,8 @@ interface CardListProps {
   id?: string // Valfritt id för urval
 }
 
+const filter = createFilterOptions<AutoSelectMember>()
+
 export default function CardList({
   searchKeyword,
   id: spaceId,
@@ -80,8 +84,8 @@ export default function CardList({
   const [addFriendValue, setAddFriendValue] = useState<AutoSelectMember | null>(
     null
   )
-  const members = [] as any[] // useLiveSpaceMembers(space)
-  const allMembers = useLiveSpaceMembers()
+  const members = useLiveSpaceMembers(space)
+  const allMembers = useLiveAllMembers()
 
   const dexieCloudUser = useObservable(db.cloud.currentUser) || {
     userId: "unauthorized",
@@ -136,8 +140,6 @@ export default function CardList({
   if (!cards) {
     return <CircularProgress />
   }
-
-  console.log("Rendering CardList", space)
 
   return (
     <>
