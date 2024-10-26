@@ -23,6 +23,7 @@ export interface ICard {
   id: string
   type: "image" | "text" | "document"
   createdAt: string
+  title: string
   content?: string[]
   doc: Y.Doc
   docHtml?: string
@@ -133,6 +134,14 @@ export const createCard = async (card: ICard) => {
 export const updateCard = async (id: string, content: string) => {
   try {
     await db.card.where("id").equals(id).modify({ description: content })
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+export const updateCardTitle = async (id: string, title: string) => {
+  try {
+    await db.card.where("id").equals(id).modify({ title: title })
   } catch (e) {
     console.error(e)
   }

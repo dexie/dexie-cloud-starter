@@ -31,6 +31,7 @@ import {
   shareSpaceList,
   unshareSpaceList,
   updateCard,
+  updateCardTitle,
   useLiveAllMembers,
   useLiveDataCards,
   useLiveDataSpaces,
@@ -203,7 +204,19 @@ export default function CardList({
       >
         <NewCard spaceId={spaceId} />
         {cards.map((item) => (
-          <ItemCard key={item.id} item={item} />
+          <Box key={item.id} sx={{}}>
+            <ItemCard item={item} />
+            <Box
+              sx={{
+                pt: 1.5,
+                textAlign: "center",
+                fontSize: "0.9rem",
+                opacity: 0.6,
+              }}
+            >
+              {item.title}
+            </Box>
+          </Box>
         ))}
       </Masonry>
       <Dialog
@@ -230,8 +243,8 @@ export default function CardList({
             sx={{
               flexGrow: 1,
               display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
+              overflowY: "auto",
+              padding: 2,
             }}
           >
             <Tiptap
@@ -243,21 +256,38 @@ export default function CardList({
               setIsEditorEmpty={setIsEditorEmpty}
               getContent={() => {}}
               onPost={handlePost}
-              style={{
-                minWidth: "810px",
-              }}
             />
           </Box>
           <Box
             sx={{
               backgroundColor: alpha(theme.palette.text.primary, 0.05),
               display: "flex",
-              justifyContent: "center",
+              flexDirection: "column",
+              justifyContent: "space-between",
               alignItems: "center",
               minWidth: "300px",
               borderRadius: 2,
+              padding: "30px 20px",
             }}
           >
+            <Box
+              sx={{
+                width: "100%",
+              }}
+            >
+              <TextField
+                variant="standard"
+                label="Title"
+                value={rowBeingEdited?.title || ""}
+                onChange={(e) => {
+                  updateCardTitle(isModalEdit as string, e.target.value)
+                }}
+                sx={{
+                  width: "100%",
+                  marginBottom: "10px",
+                }}
+              />
+            </Box>
             <Box
               sx={{
                 display: "flex",
@@ -324,21 +354,27 @@ export default function CardList({
                     (a.userId || "").toLowerCase().trim() ===
                     (b.userId || "").toLowerCase().trim()
                 )
-                  ?.filter(
-                    (m) =>
-                      m.userId &&
-                      members?.map((i) => i.userId).indexOf(m.userId) == -1
-                  )
-                  .sort((a, b) => {
-                    a.userId = a.userId || ""
-                    b.userId = b.userId || ""
-                    return a.userId.localeCompare(b.userId)
+                  ?.filter((m) => {
+                    const memberUserIds = members?.map((i) =>
+                      i.userId?.toLowerCase().trim()
+                    )
+                    const memberEmails = members?.map((i) =>
+                      i.email?.toLowerCase().trim()
+                    )
+
+                    return (
+                      !memberUserIds?.includes(
+                        m.userId?.toLowerCase().trim()
+                      ) &&
+                      !memberEmails?.includes(m.email?.toLowerCase().trim())
+                    )
                   })
-                  .map((member) => {
-                    return {
-                      title: member.userId,
-                    }
-                  }) || []
+                  .sort((a, b) => {
+                    return (a.userId || "").localeCompare(b.userId || "")
+                  })
+                  .map((member) => ({
+                    title: member.userId,
+                  })) || []
               }
               getOptionLabel={(option) => {
                 // Value selected with enter, right from the input
