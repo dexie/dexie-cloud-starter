@@ -291,16 +291,28 @@ export default function CardList({
             <Box
               sx={{
                 display: "flex",
-                gap: 1,
-                padding: 1,
-                backgroundColor: alpha(theme.palette.text.primary, 0.05),
-                borderRadius: "50%",
-              }}
-              onClick={() => {
-                deleteCard(isModalEdit as string)
+                justifyContent: "space-between",
+                width: "100%",
               }}
             >
-              <DeleteOutlineIcon />
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 1,
+                  padding: 1,
+                  backgroundColor: alpha(theme.palette.text.primary, 0.05),
+                  borderRadius: "50%",
+                }}
+                onClick={() => {
+                  if (confirm("Are you sure you want to delete this card?")) {
+                    deleteCard(isModalEdit as string)
+                    closeModal()
+                  }
+                }}
+              >
+                <DeleteOutlineIcon />
+              </Box>
+              <Avatars realmId={rowBeingEdited?.realmId as string} compact />
             </Box>
           </Box>
         </DialogContent>

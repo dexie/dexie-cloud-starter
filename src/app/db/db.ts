@@ -121,7 +121,7 @@ export class DexieStarter extends Dexie {
 }
 
 export const createCard = async (card: ICard) => {
-  const realmId = getTiedRealmId(card.spaceId || "")
+  const realmId = card.spaceId && getTiedRealmId(card.spaceId)
   card.realmId = realmId
 
   try {
