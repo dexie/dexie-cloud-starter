@@ -14,7 +14,7 @@ import {
 import Dialog from "@mui/material/Dialog"
 import DialogContent from "@mui/material/DialogContent"
 import theme from "@/theme"
-import { Suspense, use, useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Masonry from "react-masonry-css"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline"
@@ -30,7 +30,6 @@ import {
   deleteCard,
   shareSpaceList,
   unshareSpaceList,
-  updateCard,
   updateCardTitle,
   useLiveAllMembers,
   useLiveDataCards,
@@ -42,9 +41,10 @@ import { uniqWith } from "lodash"
 import ShareUserRow from "./SharedUserRow"
 import dynamic from "next/dynamic"
 import Avatars from "./Avatars"
+import { Editor } from "@tiptap/react"
 
 const Tiptap = dynamic(
-  () => import("../components/Tiptap").then((mod) => mod.default),
+  () => import("../components/tiptap").then((mod) => mod.default),
   {
     ssr: false,
   }
@@ -98,6 +98,8 @@ export default function CardList({
     setIsModalEdit(modalParam || undefined)
   }, [searchParams])
 
+  const editorRef = useRef<Editor | null>(null);
+
   const rowBeingEdited = useLiveQuery(
     () =>
       isModalEdit ? db.card.where("id").equals(isModalEdit).first() : undefined,
@@ -108,15 +110,6 @@ export default function CardList({
   const closeModal = () => {
     setIsModalEdit(undefined)
     router.push(pathname)
-  }
-
-  const handlePost = (content: string) => {
-    if (!isModalEdit) return
-
-    updateCard(isModalEdit, content)
-    setCanPost(false)
-    setIsEdited(false)
-    setIsEditorEmpty(true)
   }
 
   async function shareProject(friend: string) {
@@ -250,12 +243,11 @@ export default function CardList({
             <Tiptap
               yDoc={rowBeingEdited?.doc || new Y.Doc()}
               provider={provider}
-              setEditor={() => {}}
+              editorRef={editorRef}
               setIsEdited={setIsEdited}
               setCanPost={setCanPost}
               setIsEditorEmpty={setIsEditorEmpty}
-              getContent={() => {}}
-              onPost={handlePost}
+              getContent={() => { }}
             />
           </Box>
           <Box
@@ -458,7 +450,7 @@ export default function CardList({
                       userId: dexieCloudUser.email,
                     }}
                     space={space}
-                    deleteAction={() => {}}
+                    deleteAction={() => { }}
                   />
                 )}
 

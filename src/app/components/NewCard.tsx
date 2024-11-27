@@ -1,16 +1,17 @@
 "use client"
 
-import { use, useState } from "react"
+import { use, useRef, useState } from "react"
 import { v4 as uuid } from "uuid"
 import { createCard, ICard } from "../db/db"
 import dayjs from "dayjs"
-import Tiptap from "@/app/components/Tiptap"
+import Tiptap from "@/app/components/tiptap"
 import theme from "@/theme"
 import Button from "@mui/material/Button"
 import { Typography, CardContent } from "@mui/material"
 import { useSearch } from "../(pages)/SearchContext"
 import { ContentCard, ContentWrapper } from "./ItemCard"
 import * as Y from "yjs"
+import { Editor } from "@tiptap/react"
 
 interface NewCardProps {
   spaceId?: string
@@ -24,6 +25,7 @@ const NewCard = ({ spaceId }: NewCardProps) => {
   const [editor, setEditor] = useState<any>(null) // Ny state för editor-instansen
   const { searchKeyword, setSearchKeyword } = useSearch()
   const tempDoc = useState(() => new Y.Doc())[0]
+  const editorRef = useRef<Editor | null>(null);
 
   // Funktion som körs när Ctrl+Enter eller Cmd+Enter trycks
   const handlePost = (yDoc: Y.Doc) => {
@@ -76,7 +78,7 @@ const NewCard = ({ spaceId }: NewCardProps) => {
               setIsEditorEmpty={setIsEditorEmpty}
               getContent={setEditorContent}
               onPost={() => handlePost(tempDoc)} // Skicka in handlePost-funktionen
-              setEditor={setEditor} // Skicka in setEditor
+              editorRef={editorRef}
             />
             {canPost && (
               <Button
