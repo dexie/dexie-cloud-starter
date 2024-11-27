@@ -13,6 +13,7 @@ import { docToHtml } from '../lib/docToHtml'
 import { debounce } from 'lodash'
 import { extractLunrKeywords } from './search'
 import { query } from '../lib/query'
+import { populate } from '../lib/populate'
 
 export interface AutoSelectMember {
   inputValue?: string
@@ -59,6 +60,7 @@ export class DexieStarter extends Dexie {
     this.version(1).stores({
       card: `
         id,
+        realmId,
         *fullTextIndex,
         doc:Y,
         spaceId`,
@@ -353,6 +355,7 @@ const initializeDatabase = async () => {
     })
 
     console.log('Database initialized and ready event subscribed.')
+    await populate()
   } catch (error) {
     let errorMessage = 'Failed to initialize the database.'
     if (error instanceof Error) {
