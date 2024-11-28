@@ -238,6 +238,8 @@ export default function CardList({
               display: "flex",
               overflowY: "auto",
               padding: 2,
+              width: "100%",
+              minHeight: "100%",
             }}
           >
             <Tiptap
@@ -248,6 +250,7 @@ export default function CardList({
               setCanPost={setCanPost}
               setIsEditorEmpty={setIsEditorEmpty}
               getContent={() => { }}
+              style={{ minHeight: "100%", width: "100%" }}
             />
           </Box>
           <Box

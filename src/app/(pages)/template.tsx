@@ -22,6 +22,7 @@ import { deleteUserAccount } from "../lib/delete-account"
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove"
 import LogoutIcon from "@mui/icons-material/Logout"
 import { InviteAlert } from "../components/InviteAlert"
+import UserInteractionWrapper from "../components/UserInteractionWrapper"
 
 export default function Template({ children }: { children: ReactNode }) {
   const router = useRouter()
@@ -31,110 +32,112 @@ export default function Template({ children }: { children: ReactNode }) {
     email: "",
   }
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (dexieCloudUser.userId === "unauthorized") {
       router.push("/")
     }
-  }, [dexieCloudUser.userId, router])
+  }, [dexieCloudUser.userId, router])*/
 
   return (
-    <SearchProvider>
-      <Container
-        maxWidth={false}
-        disableGutters
-        sx={{
-          minHeight: "100vh",
-        }}
-      >
-        <AppBar position="static" color="transparent" elevation={0}>
-          <Toolbar
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "flex-start",
-              padding: "0 16px",
-            }}
-          >
-            <SearchField />
-            <Box
+    <UserInteractionWrapper>
+      <SearchProvider>
+        <Container
+          maxWidth={false}
+          disableGutters
+          sx={{
+            minHeight: "100vh",
+          }}
+        >
+          <AppBar position="static" color="transparent" elevation={0}>
+            <Toolbar
               sx={{
-                mx: 2,
-                borderTop: `solid 6px transparent`,
-                pt: 1,
-                color: theme.palette.primary.main,
-                cursor: "pointer",
-              }}
-              onClick={() => {
-                router.push("/invites")
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "flex-start",
+                padding: "0 16px",
               }}
             >
-              <InviteAlert />
-            </Box>
-            <NavItem name="Everything" href="/everything" />
-            <NavItem name="Spaces" href="/spaces" />
-            <NavItem name="Serendipity" href="/serendipity" />
+              <SearchField />
+              <Box
+                sx={{
+                  mx: 2,
+                  borderTop: `solid 6px transparent`,
+                  pt: 1,
+                  color: theme.palette.primary.main,
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  router.push("/invites")
+                }}
+              >
+                <InviteAlert />
+              </Box>
+              <NavItem name="Everything" href="/everything" />
+              <NavItem name="Spaces" href="/spaces" />
+              <NavItem name="Serendipity" href="/serendipity" />
 
-            <Typography
-              variant="body1"
-              sx={{
-                mx: 2,
-                borderTop: `solid 4px transparent`,
-                pt: 1,
-                cursor: "pointer",
-                color: theme.palette.primary.main,
-              }}
-              onClick={() => {
-                confirm("Reset all stored data?") && db.card.clear()
-              }}
-            >
-              <HistoryIcon />
-            </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  mx: 2,
+                  borderTop: `solid 4px transparent`,
+                  pt: 1,
+                  cursor: "pointer",
+                  color: theme.palette.primary.main,
+                }}
+                onClick={() => {
+                  confirm("Reset all stored data?") && db.card.clear()
+                }}
+              >
+                <HistoryIcon />
+              </Typography>
 
-            <Typography
-              variant="body1"
+              <Typography
+                variant="body1"
+                sx={{
+                  mx: 2,
+                  borderTop: `solid 4px transparent`,
+                  pt: 1,
+                  cursor: "pointer",
+                  color: theme.palette.primary.main,
+                }}
+                onClick={() => {
+                  deleteUserAccount(dexieCloudUser as any, router)
+                }}
+              >
+                <PersonRemoveIcon />
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  mx: 2,
+                  borderTop: `solid 4px transparent`,
+                  pt: 1,
+                  color: theme.palette.primary.main,
+                }}
+                onClick={() => {
+                  confirm("Logout and remove local database?") &&
+                    router.push("/logout")
+                }}
+              >
+                <LogoutIcon />
+              </Typography>
+            </Toolbar>
+          </AppBar>
+          <Box sx={{ p: 2, pt: 0, mt: 0 }}>
+            <Divider
               sx={{
-                mx: 2,
-                borderTop: `solid 4px transparent`,
-                pt: 1,
-                cursor: "pointer",
-                color: theme.palette.primary.main,
+                mb: 2,
+                width: "100%",
+                border: `solid 1px ${theme.palette.divider}`,
               }}
-              onClick={() => {
-                deleteUserAccount(dexieCloudUser as any, router)
-              }}
-            >
-              <PersonRemoveIcon />
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{
-                mx: 2,
-                borderTop: `solid 4px transparent`,
-                pt: 1,
-                color: theme.palette.primary.main,
-              }}
-              onClick={() => {
-                confirm("Logout and remove local database?") &&
-                  router.push("/logout")
-              }}
-            >
-              <LogoutIcon />
-            </Typography>
-          </Toolbar>
-        </AppBar>
-        <Box sx={{ p: 2, pt: 0, mt: 0 }}>
-          <Divider
-            sx={{
-              mb: 2,
-              width: "100%",
-              border: `solid 1px ${theme.palette.divider}`,
-            }}
-          />
-          {children}
-        </Box>
-      </Container>
-    </SearchProvider>
+            />
+            {children}
+          </Box>
+        </Container>
+      </SearchProvider>
+    </UserInteractionWrapper>
   )
 }
 
