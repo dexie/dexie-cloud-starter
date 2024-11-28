@@ -22,11 +22,11 @@ export default function UserInteractionWrapper({
   }, [])
 
   switch (true) {
-    case !!userInteraction:
+    case userInteraction != null:
       // Dexie Cloud wants to interact with the user before proceeding.
       return <SignIn {...userInteraction} />
 
-    case !!error:
+    case error != null:
       // Could not open database for some reason. Show error message instead of just an eternal spinner.
       return <div>{'' + error}</div>
 
