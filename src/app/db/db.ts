@@ -11,7 +11,7 @@ import * as Y from 'yjs'
 import * as awarenessProtocol from 'y-protocols/awareness'
 import { docToHtml } from '../lib/docToHtml'
 import { debounce } from 'lodash'
-import { extractLunrKeywords } from './search'
+import { extractLunrKeywords } from './fullTextSearch'
 import { query } from '../lib/query'
 import { populate } from '../lib/populate'
 
@@ -72,23 +72,12 @@ export class DexieStarter extends Dexie {
 
     // A trigger to set the docHtml string attribute from Y.Doc content
     defineYDocTrigger(this.card, 'doc', async (ydoc, parentId) => {
-      console.log('Triggered', ydoc, parentId)
       const html = docToHtml(ydoc as any)
       await this.card.update(parentId, {
         docHtml: html,
         fullTextIndex: extractLunrKeywords(html),
       })
-      //updateFullTextIndex({ html }, parentId);
     })
-
-    // A 5-seconds debounced function to update the full text search index
-    const updateFullTextIndex = debounce(({ html, image }, parentId) => {
-      if (html) {
-        this.card.update(parentId, {
-          fullTextIndex: extractLunrKeywords(html),
-        })
-      }
-    }, 5000)
 
     this.cloud.configure({
       databaseUrl:

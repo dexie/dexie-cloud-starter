@@ -25,24 +25,21 @@ export function extractLunrKeywords(html: string) {
  *
  */
 export function preprocessHtml(html: string) {
+  const texts: string[] = []
   const div = document.createElement('div')
   div.innerHTML = html
 
-  function extractText(node: Node): string {
-    let text = ''
+  function extractText(node: Node) {
     for (const child of node.childNodes) {
       if (child.nodeType === Node.TEXT_NODE) {
-        text += child.textContent
+        const trimmed = child.textContent?.trim()
+        if (trimmed) texts.push(trimmed)
       } else if (child.nodeType === Node.ELEMENT_NODE) {
-        text += extractText(child)
-        const computedStyle = getComputedStyle(child as Element)
-        if (['block', 'flex', 'grid'].includes(computedStyle.display)) {
-          text += ' '
-        }
+        extractText(child)
       }
     }
-    return text.trim()
   }
 
-  return extractText(div)
+  extractText(div)
+  return texts.join(' ')
 }
