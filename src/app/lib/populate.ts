@@ -58,25 +58,6 @@ export async function populate() {
 
   console.log('Db is open now')
 
-  // Wait till sync for authenticated user is complete (TODO: Fix a better way to wait for sync)
-  await new Promise((resolve) => {
-    let unsubscribed = false
-    let s: null | Subscription = null
-    s = db.cloud.persistedSyncState.subscribe((state) => {
-      if (state?.realms.includes(db.cloud.currentUserId)) {
-        // A full sync for a logged in user has taken place
-        if (s) {
-          s.unsubscribe()
-          unsubscribed = true
-        }
-        resolve(null)
-      }
-    })
-    if (!unsubscribed) {
-      s.unsubscribe()
-    }
-  })
-
   console.log('A full sync has taken place')
 
   // At this point as we know that an authenticated sync has been completed,
