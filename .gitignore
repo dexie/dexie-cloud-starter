@@ -38,3 +38,4 @@ next-env.d.ts
 
 # dexie-cloud
 dexie-cloud.key
+dexie-cloud.json
