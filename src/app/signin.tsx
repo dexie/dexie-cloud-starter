@@ -1,11 +1,10 @@
 'use client'
 
 import { useObservable } from 'dexie-react-hooks'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Head from 'next/head'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { DXCUserInteraction, resolveText } from 'dexie-cloud-addon'
-import { uniqBy } from 'lodash'
 import {
   Alert,
   alpha,
@@ -59,10 +58,6 @@ interface Field {
   type: string
   label: string
   placeholder: string
-}
-
-interface MyFields {
-  [key: string]: Field
 }
 
 export default function SignIn({
@@ -161,11 +156,7 @@ export default function SignIn({
             ))}
             {Object.entries(
               fields as {
-                [fieldName: string]: {
-                  type: string
-                  label: string
-                  placeholder: string
-                }
+                [fieldName: string]: Field
               },
             ).map(([fieldName, { type, label, placeholder }], idx) => (
               <Box key={idx}>
@@ -203,7 +194,7 @@ export default function SignIn({
                         ...params,
                         [fieldName]: valueTransformer(
                           type,
-                          (ev.target as any)?.['value'],
+                          (ev.target as any)?.value,
                         ),
                       })
                     }}
