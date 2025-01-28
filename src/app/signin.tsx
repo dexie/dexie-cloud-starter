@@ -75,10 +75,6 @@ export default function SignIn({
   const currenUser = useObservable(db.cloud.currentUser)
   const [isFocused, setIsFocused] = useState(false)
 
-  const reset = () => {
-    router.refresh() // For refreshing the page
-  }
-
   useEffect(() => {
     if (
       currenUser?.userId != undefined &&
@@ -115,7 +111,7 @@ export default function SignIn({
             minWidth: isSmallScreen ? '100vw' : '700px',
             minHeight: isSmallScreen ? '100vh' : '700px',
             justifyContent: 'center',
-            backgroundColor: theme.palette.background.default, // "#FBFBFD"
+            backgroundColor: theme.palette.background.default,
           }}
         >
           <Box
@@ -190,12 +186,10 @@ export default function SignIn({
                       }, 300)
                     }}
                     onInput={(ev) => {
+                      const target = ev.target as HTMLInputElement
                       setParams({
                         ...params,
-                        [fieldName]: valueTransformer(
-                          type,
-                          (ev.target as any)?.value,
-                        ),
+                        [fieldName]: valueTransformer(type, target.value),
                       })
                     }}
                     id="outlined-basic"
@@ -219,7 +213,7 @@ export default function SignIn({
                       endAdornment: (
                         <InputAdornment
                           position="end"
-                          onClick={(ev) => onSubmit(params)}
+                          onClick={() => onSubmit(params)}
                           style={{ cursor: 'pointer' }}
                         >
                           {onSubmit == undefined ? (

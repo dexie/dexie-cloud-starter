@@ -1,55 +1,55 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import Head from "next/head"
-import Dexie from "dexie"
+import { useState } from 'react'
+import Head from 'next/head'
+import Dexie from 'dexie'
 
 const Logout = () => {
   const dbLink =
-    (process.env.NEXT_PUBLIC_DEXIE_CLOUD_DB_URL || "")
-      .split("//")[1]
-      ?.split(".")[0] || ""
+    (process.env.NEXT_PUBLIC_DEXIE_CLOUD_DB_URL || '')
+      .split('//')[1]
+      ?.split('.')[0] || ''
 
-  const dbName = "DexieStarter-" + dbLink
+  const dbName = 'DexieStarter-' + dbLink
 
   console.log(dbName)
 
-  const [message, setMessage] = useState("Logging out...")
+  const [message, setMessage] = useState('Logging out...')
   const logout = async () => {
     Dexie.exists(dbName)
       .then((dbExist) => {
         if (dbExist) {
-          setMessage("Deleting database..." as string)
+          setMessage('Deleting database...' as string)
           Dexie.delete(dbName)
             .then(() => {})
             .catch((error) => {
               setMessage(error)
               setTimeout(() => {
-                if (typeof window !== "undefined") {
+                if (typeof window !== 'undefined') {
                   window.location.reload()
                 }
               }, 3000)
             })
             .finally(() => {
-              setMessage("Cleaning up..." as string)
+              setMessage('Cleaning up...' as string)
               setTimeout(() => {
-                if (typeof window !== "undefined") {
+                if (typeof window !== 'undefined') {
                   window.location.reload()
                 }
               }, 3000)
             })
         } else {
-          setMessage("Logging out..." as string)
+          setMessage('Logging out...' as string)
           setTimeout(() => {
-            if (typeof window !== "undefined") {
-              window.location.href = "/"
+            if (typeof window !== 'undefined') {
+              window.location.href = '/'
             }
           }, 3000)
         }
       })
       .catch((error) => {
         setTimeout(() => {
-          if (typeof window !== "undefined") {
+          if (typeof window !== 'undefined') {
             window.location.reload()
           }
         }, 3000)

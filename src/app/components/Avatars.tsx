@@ -1,8 +1,8 @@
-import { useLiveQuery, useObservable } from "dexie-react-hooks"
-import { FC, useEffect, useState } from "react"
-import { alpha, Avatar, Box, SxProps, useTheme } from "@mui/material"
-import { db } from "../db/db"
-import { hexify, stringToColor, invertColor } from "../lib/color-handling"
+import { useLiveQuery, useObservable } from 'dexie-react-hooks'
+import { FC, useEffect, useState } from 'react'
+import { alpha, Avatar, Box, SxProps, useTheme } from '@mui/material'
+import { db } from '../db/db'
+import { hexify, stringToColor, invertColor } from '../lib/color-handling'
 
 interface AvatarProp {
   realmId: string
@@ -18,20 +18,14 @@ interface MemberAvatar {
   owner?: boolean
 }
 
-const Avatars: FC<AvatarProp> = ({
-  realmId,
-  selected,
-  compact,
-  sx,
-  single,
-}) => {
+const Avatars: FC<AvatarProp> = ({ realmId, selected, sx, single }) => {
   const currentUser = useObservable(db.cloud.currentUser)
   const members = useLiveQuery(() => {
     try {
       if (!realmId) return []
 
-      return db.members.where("realmId").equals(realmId).toArray()
-    } catch (e) {
+      return db.members.where('realmId').equals(realmId).toArray()
+    } catch {
       return []
     }
   }, [realmId])
@@ -45,7 +39,6 @@ const Avatars: FC<AvatarProp> = ({
       const memberAvatar: MemberAvatar[] = []
 
       members.map((member, i) => {
-        // Add owner
         if (i === 0)
           memberAvatar.push({
             email: member.owner as string,
@@ -72,7 +65,7 @@ const Avatars: FC<AvatarProp> = ({
                 .sort(
                   (a, b) =>
                     (b.owner === true ? -1 : a.owner === true ? 1 : 0) ||
-                    (a.pending ? -1 : 1)
+                    (a.pending ? -1 : 1),
                 )
                 .reverse()[0],
             ]
@@ -81,8 +74,8 @@ const Avatars: FC<AvatarProp> = ({
               .sort(
                 (a, b) =>
                   (b.owner === true ? -1 : a.owner === true ? 1 : 0) ||
-                  (a.pending ? -1 : 1)
-              )
+                  (a.pending ? -1 : 1),
+              ),
       )
     }
 
@@ -90,7 +83,7 @@ const Avatars: FC<AvatarProp> = ({
   }, [currentUser?.userId, realmId, members, currentUser?.email, single])
 
   return (
-    <Box style={{ display: "flex" }} alignItems="center">
+    <Box style={{ display: 'flex' }} alignItems="center">
       {avatars?.map((avatar, index) => (
         <Avatar
           key={realmId + avatar.email + index}
@@ -99,25 +92,25 @@ const Avatars: FC<AvatarProp> = ({
             opacity: avatar.pending ? 0.25 : 1,
             bgcolor: hexify(
               alpha(stringToColor(avatar.email), 0.5),
-              alpha(theme.palette.background.default, 1)
+              alpha(theme.palette.background.default, 1),
             ),
             width: 24,
             height: 24,
             border:
-              "2px solid " +
+              '2px solid ' +
               hexify(
                 alpha(theme.palette.text.primary, selected ? 0.11 : 0.05),
-                alpha(theme.palette.background.default, 1)
+                alpha(theme.palette.background.default, 1),
               ),
-            fontSize: "0.7rem",
+            fontSize: '0.7rem',
             color: alpha(invertColor(stringToColor(avatar.email)), 0.8),
-            paddingRight: avatars.length > 1 && index == 0 ? "4px" : "0px",
+            paddingRight: avatars.length > 1 && index == 0 ? '4px' : '0px',
             marginLeft:
               index == 0
-                ? "0px"
+                ? '0px'
                 : avatars != undefined && avatars.length > 4
-                  ? "-20px"
-                  : 20 / avatars.length - 18 + "px",
+                  ? '-20px'
+                  : 20 / avatars.length - 18 + 'px',
           }}
           title={avatar.email}
         >

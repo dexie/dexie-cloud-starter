@@ -1,9 +1,7 @@
 import dayjs from 'dayjs'
 import { ICard, db } from '../db/db'
 import { v4 as uuid } from 'uuid'
-import { docToHtml, htmlToDoc } from './docToHtml'
-import * as Y from 'yjs'
-import { Subscription } from 'dexie'
+import { htmlToDoc } from './docToHtml'
 
 const cardItems = [
   {
@@ -64,7 +62,7 @@ export async function populate() {
   // if db.card is empty, we're on a totally fresh new user.
   if ((await db.card.count()) === 0) {
     console.log('Populating the database with initial data')
-    await db.transaction('rw', db.card as any, async () => {
+    await db.transaction('rw', db.card, async () => {
       if ((await db.card.count()) > 0) return
       await db.card.clear()
       const cardsToInsert = cardItems.map((cardItem) => {
@@ -72,9 +70,6 @@ export async function populate() {
         if (cardItem.description) {
           // Convert description HTML to Y.Doc before inserting to DB:
           cardToInsert.doc = htmlToDoc(cardItem.description)
-          const stateVector = Y.encodeStateVector(cardToInsert.doc)
-          //cardToInsert.docHtml = cardItem.description;
-          //const backHtml = docToHtml(cardToInsert.doc);
           delete cardToInsert.description
         }
         return cardToInsert

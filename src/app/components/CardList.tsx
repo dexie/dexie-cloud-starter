@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import {
   Box,
@@ -10,20 +10,20 @@ import {
   Divider,
   TextField,
   createFilterOptions,
-} from "@mui/material"
-import Dialog from "@mui/material/Dialog"
-import DialogContent from "@mui/material/DialogContent"
-import theme from "@/theme"
-import { useEffect, useRef, useState } from "react"
-import Masonry from "react-masonry-css"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline"
-import * as Y from "yjs"
-import { useDocument, useLiveQuery, useObservable } from "dexie-react-hooks"
-import NewCard from "./NewCard"
-import ItemCard from "./ItemCard"
-import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos"
-import GroupIcon from "@mui/icons-material/Group"
+} from '@mui/material'
+import Dialog from '@mui/material/Dialog'
+import DialogContent from '@mui/material/DialogContent'
+import theme from '@/theme'
+import { useEffect, useRef, useState } from 'react'
+import Masonry from 'react-masonry-css'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
+import * as Y from 'yjs'
+import { useDocument, useLiveQuery, useObservable } from 'dexie-react-hooks'
+import NewCard from './NewCard'
+import ItemCard from './ItemCard'
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
+import GroupIcon from '@mui/icons-material/Group'
 import {
   AutoSelectMember,
   db,
@@ -35,19 +35,20 @@ import {
   useLiveDataCards,
   useLiveDataSpaces,
   useLiveSpaceMembers,
-} from "../db/db"
-import Link from "next/link"
-import { uniqWith } from "lodash"
-import ShareUserRow from "./SharedUserRow"
-import dynamic from "next/dynamic"
-import Avatars from "./Avatars"
-import { Editor } from "@tiptap/react"
+} from '../db/db'
+import Link from 'next/link'
+import { uniqWith } from 'lodash'
+import ShareUserRow from './SharedUserRow'
+import dynamic from 'next/dynamic'
+import Avatars from './Avatars'
+import { Editor } from '@tiptap/react'
+import { DBRealmMember } from 'dexie-cloud-addon'
 
 const Tiptap = dynamic(
-  () => import("../components/tiptap").then((mod) => mod.default),
+  () => import('../components/tiptap').then((mod) => mod.default),
   {
     ssr: false,
-  }
+  },
 )
 
 const breakpointColumnsObj = {
@@ -59,7 +60,7 @@ const breakpointColumnsObj = {
 
 interface CardListProps {
   searchKeyword: string
-  id?: string // Valfritt id för urval
+  id?: string
 }
 
 const filter = createFilterOptions<AutoSelectMember>()
@@ -69,41 +70,37 @@ export default function CardList({
   id: spaceId,
 }: CardListProps) {
   const router = useRouter()
-  const searchParams = useSearchParams() // Hämta query-parametrar
+  const searchParams = useSearchParams()
   const pathname = usePathname()
 
   const space = useLiveDataSpaces(spaceId)[0]
   const cards = useLiveDataCards(searchKeyword, spaceId)
 
   const [isModalEdit, setIsModalEdit] = useState<string | undefined>(undefined)
-  const [isEdited, setIsEdited] = useState(false)
-  const [canPost, setCanPost] = useState(false)
-  const [isEditorEmpty, setIsEditorEmpty] = useState(true)
 
-  // Share dialog
   const [showShareDialogOpen, setShowShareDialogOpen] = useState(false)
   const [addFriendValue, setAddFriendValue] = useState<AutoSelectMember | null>(
-    null
+    null,
   )
   const members = useLiveSpaceMembers(space)
   const allMembers = useLiveAllMembers()
 
   const dexieCloudUser = useObservable(db.cloud.currentUser) || {
-    userId: "unauthorized",
-    email: "",
+    userId: 'unauthorized',
+    email: '',
   }
 
   useEffect(() => {
-    const modalParam = searchParams.get("edit")
+    const modalParam = searchParams.get('edit')
     setIsModalEdit(modalParam || undefined)
   }, [searchParams])
 
-  const editorRef = useRef<Editor | null>(null);
+  const editorRef = useRef<Editor | null>(null)
 
   const rowBeingEdited = useLiveQuery(
     () =>
-      isModalEdit ? db.card.where("id").equals(isModalEdit).first() : undefined,
-    [isModalEdit]
+      isModalEdit ? db.card.where('id').equals(isModalEdit).first() : undefined,
+    [isModalEdit],
   )
   const provider = useDocument(rowBeingEdited?.doc)
 
@@ -117,14 +114,17 @@ export default function CardList({
     if (members.find((m) => m.email == friend.toLowerCase().trim())) return
 
     shareSpaceList(space, {
-      name: friend.split("@")[0],
+      name: friend.split('@')[0],
       email: friend.toLowerCase().trim(),
+      id: '',
+      realmId: '',
+      owner: '',
     })
 
     setAddFriendValue(null)
   }
 
-  async function deleteSharedUser(member: any) {
+  async function deleteSharedUser(member: DBRealmMember) {
     const members = []
     members.push(member)
 
@@ -141,38 +141,38 @@ export default function CardList({
         <>
           <Box
             sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
             }}
           >
             <Box
               sx={{
-                display: "flex",
-                justifyContent: "flex-start",
-                alignItems: "center",
+                display: 'flex',
+                justifyContent: 'flex-start',
+                alignItems: 'center',
               }}
             >
-              <Link href={"/spaces"}>
+              <Link href={'/spaces'}>
                 <ArrowBackIosIcon sx={{ mr: 2 }} />
               </Link>
               <Typography variant="h5">{space?.title}</Typography>
             </Box>
             <Box
               sx={{
-                display: "flex",
-                justifyContent: "flex-end",
-                alignItems: "center",
+                display: 'flex',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
                 gap: 1,
               }}
             >
               <Avatars realmId={space?.realmId as string} compact />
               <Box
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
+                  display: 'flex',
+                  alignItems: 'center',
                   gap: 1,
-                  cursor: "pointer",
+                  cursor: 'pointer',
                 }}
                 onClick={() => setShowShareDialogOpen(true)}
               >
@@ -184,7 +184,7 @@ export default function CardList({
           <Divider
             sx={{
               my: 2,
-              width: "100%",
+              width: '100%',
               border: `solid 1px ${theme.palette.divider}`,
             }}
           />
@@ -202,8 +202,8 @@ export default function CardList({
             <Box
               sx={{
                 pt: 1.5,
-                textAlign: "center",
-                fontSize: "0.9rem",
+                textAlign: 'center',
+                fontSize: '0.9rem',
                 opacity: 0.6,
               }}
             >
@@ -219,87 +219,84 @@ export default function CardList({
         onClose={closeModal}
         PaperProps={{
           style: {
-            minHeight: "90%",
-            maxHeight: "90%",
-            minWidth: "90%",
-            maxWidth: "90%",
+            minHeight: '90%',
+            maxHeight: '90%',
+            minWidth: '90%',
+            maxWidth: '90%',
           },
         }}
       >
         <DialogContent
           sx={{
-            display: "flex",
-            height: "100%",
+            display: 'flex',
+            height: '100%',
           }}
         >
           <Box
             sx={{
               flexGrow: 1,
-              display: "flex",
-              overflowY: "auto",
+              display: 'flex',
+              overflowY: 'auto',
               padding: 2,
-              width: "100%",
-              minHeight: "100%",
+              width: '100%',
+              minHeight: '100%',
             }}
           >
             <Tiptap
               yDoc={rowBeingEdited?.doc || new Y.Doc()}
               provider={provider}
               editorRef={editorRef}
-              setIsEdited={setIsEdited}
-              setCanPost={setCanPost}
-              setIsEditorEmpty={setIsEditorEmpty}
-              getContent={() => { }}
-              style={{ minHeight: "100%", width: "100%" }}
+              setCanPost={() => {}}
+              style={{ minHeight: '100%', width: '100%' }}
             />
           </Box>
           <Box
             sx={{
               backgroundColor: alpha(theme.palette.text.primary, 0.05),
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              alignItems: "center",
-              minWidth: "300px",
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              minWidth: '300px',
               borderRadius: 2,
-              padding: "30px 20px",
+              padding: '30px 20px',
             }}
           >
             <Box
               sx={{
-                width: "100%",
+                width: '100%',
               }}
             >
               <TextField
                 variant="standard"
                 label="Title"
-                value={rowBeingEdited?.title || ""}
+                value={rowBeingEdited?.title || ''}
                 onChange={(e) => {
                   updateCardTitle(isModalEdit as string, e.target.value)
                 }}
                 sx={{
-                  width: "100%",
-                  marginBottom: "10px",
+                  width: '100%',
+                  marginBottom: '10px',
                 }}
               />
             </Box>
             <Box
               sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                width: "100%",
+                display: 'flex',
+                justifyContent: 'space-between',
+                width: '100%',
               }}
             >
               <Box
                 sx={{
-                  display: "flex",
+                  display: 'flex',
                   gap: 1,
                   padding: 1,
                   backgroundColor: alpha(theme.palette.text.primary, 0.05),
-                  borderRadius: "50%",
+                  borderRadius: '50%',
                 }}
                 onClick={() => {
-                  if (confirm("Are you sure you want to delete this card?")) {
+                  if (confirm('Are you sure you want to delete this card?')) {
                     deleteCard(isModalEdit as string)
                     closeModal()
                   }
@@ -317,30 +314,36 @@ export default function CardList({
         onClose={() => setShowShareDialogOpen(false)}
         maxWidth="xs"
       >
-        <DialogTitle id="alert-dialog-title">{"Share"}?</DialogTitle>
+        <DialogTitle id="alert-dialog-title">{'Share'}?</DialogTitle>
         <DialogContent>
           <Box>
+            {/* Ange här att vi använder vår typ AutoSelectMember */}
             <Autocomplete
               value={addFriendValue}
-              onChange={(event, newValue: any) => {
-                if (typeof newValue === "string") {
+              onChange={(event, newValue) => {
+                if (typeof newValue === 'string') {
                   shareProject(newValue)
-                } else if (newValue && newValue.inputValue) {
-                  shareProject(newValue.inputValue)
-                } else {
+                } else if (newValue && typeof newValue.title === 'string') {
                   shareProject(newValue.title)
                 }
                 setAddFriendValue(null)
               }}
               filterOptions={(options, params) => {
-                const filtered = filter(options, params)
+                const filtered = filter(
+                  options.map((option) => ({
+                    ...option,
+                    title: option.title || '',
+                  })),
+                  params,
+                )
 
                 const { inputValue } = params
-                // Suggest the creation of a new value
+
                 const isExisting = options.some(
-                  (option) => inputValue === option.title
+                  (option) => inputValue === option.title,
                 )
-                if (inputValue !== "" && !isExisting) {
+
+                if (inputValue !== '' && !isExisting) {
                   filtered.push({
                     inputValue,
                     title: `Add "${inputValue}"`,
@@ -355,44 +358,43 @@ export default function CardList({
               handleHomeEndKeys
               id="free-solo-with-text-demo"
               options={
-                uniqWith(
+                (uniqWith(
                   allMembers,
                   (a, b) =>
-                    (a.userId || "").toLowerCase().trim() ===
-                    (b.userId || "").toLowerCase().trim()
+                    (a.userId || '').toLowerCase().trim() ===
+                    (b.userId || '').toLowerCase().trim(),
                 )
                   ?.filter((m) => {
                     const memberUserIds = members?.map((i) =>
-                      i.userId?.toLowerCase().trim()
+                      i.userId?.toLowerCase().trim(),
                     )
                     const memberEmails = members?.map((i) =>
-                      i.email?.toLowerCase().trim()
+                      i.email?.toLowerCase().trim(),
                     )
 
                     return (
                       !memberUserIds?.includes(
-                        m.userId?.toLowerCase().trim()
+                        m.userId?.toLowerCase().trim(),
                       ) &&
                       !memberEmails?.includes(m.email?.toLowerCase().trim())
                     )
                   })
                   .sort((a, b) => {
-                    return (a.userId || "").localeCompare(b.userId || "")
+                    return (a.userId || '').localeCompare(b.userId || '')
                   })
                   .map((member) => ({
-                    title: member.userId,
-                  })) || []
+                    title: member.userId || '',
+                  })) || []) as AutoSelectMember[]
               }
               getOptionLabel={(option) => {
-                // Value selected with enter, right from the input
-                if (typeof option === "string") {
+                if (typeof option === 'string') {
                   return option
                 }
-                // Add "xxx" option created dynamically
+
                 if (option.inputValue) {
                   return option.inputValue
                 }
-                // Regular option
+
                 return option.title
               }}
               renderOption={(props, option) => {
@@ -406,7 +408,7 @@ export default function CardList({
               fullWidth
               freeSolo
               renderInput={(params) => (
-                <TextField {...params} label={"Add people"} />
+                <TextField {...params} label={'Add people'} />
               )}
             />
           </Box>
@@ -419,18 +421,18 @@ export default function CardList({
             >
               <Box
                 sx={{
-                  fontWeight: "500",
-                  fontSize: "18px",
+                  fontWeight: '500',
+                  fontSize: '18px',
                   color: theme.palette.text.primary,
                   mb: 1,
                 }}
               >
-                {"People with access"}
+                {'People with access'}
               </Box>
               <Box
                 sx={{
-                  maxHeight: "400px",
-                  overflowY: "auto",
+                  maxHeight: '400px',
+                  overflowY: 'auto',
                 }}
               >
                 <Divider />
@@ -449,11 +451,13 @@ export default function CardList({
                   <ShareUserRow
                     member={{
                       email: dexieCloudUser.email,
-                      owner: dexieCloudUser.email,
+                      owner: dexieCloudUser.email || '',
                       userId: dexieCloudUser.email,
+                      id: dexieCloudUser.userId || '',
+                      realmId: 'dexieCloudUser.email',
                     }}
                     space={space}
-                    deleteAction={() => { }}
+                    deleteAction={() => {}}
                   />
                 )}
 

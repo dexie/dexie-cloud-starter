@@ -1,14 +1,9 @@
-"use client"
+'use client'
 
-import { Box, Typography } from "@mui/material"
-import { v4 as uuid } from "uuid"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import dayjs from "dayjs"
-import { createSpace, useLiveDataCards, useLiveDataSpaces } from "@/app/db/db"
-import { useSearch } from "../../SearchContext"
-import CardList from "@/app/components/CardList"
-import Avatars from "@/app/components/Avatars"
+import { Box, Typography } from '@mui/material'
+import { useLiveDataSpaces } from '@/app/db/db'
+import { useSearch } from '../../SearchContext'
+import CardList from '@/app/components/CardList'
 interface PageProps {
   params: {
     id: string
@@ -25,10 +20,10 @@ export default function Spaces({ params }: PageProps) {
     return (
       <Box
         sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          height: "100%",
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          height: '100%',
         }}
       >
         <Typography variant="h5">No space on this id</Typography>

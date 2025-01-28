@@ -1,39 +1,38 @@
-"use client"
+'use client'
 
-import { FC } from "react"
-import { alpha, Avatar, SxProps, Theme, useTheme } from "@mui/material"
-import { hexify, invertColor, stringToColor } from "../lib/color-handling"
+import { FC } from 'react'
+import { alpha, Avatar, SxProps, Theme, useTheme } from '@mui/material'
+import { hexify, invertColor, stringToColor } from '../lib/color-handling'
+import { DBRealmMember } from 'dexie-cloud-addon'
 
 interface AvatarProp {
-  member: any
+  member: DBRealmMember
   sx?: SxProps<Theme>
 }
 
 const SingleAvatar: FC<AvatarProp> = ({ member, sx }) => {
   const theme = useTheme()
 
-  if (!member) return null
-  if (!member.email) member.email = member.userId
+  const email = member.email ?? member.userId ?? '???'
 
   return (
     <Avatar
-      key={member.realmId + member.email}
+      key={(member.realmId || '') + email}
       sx={{
         opacity: member.accepted ? 1 : 0.15,
         bgcolor: hexify(
-          alpha(stringToColor(member.email), 0.5),
-          alpha(theme.palette.background.default, 1)
+          alpha(stringToColor(email), 0.5),
+          alpha(theme.palette.background.default, 1),
         ),
         width: 24,
         height: 24,
-
-        fontSize: "0.7rem",
-        color: alpha(invertColor(stringToColor(member.email)), 0.8),
+        fontSize: '0.7rem',
+        color: alpha(invertColor(stringToColor(email)), 0.8),
         ...sx,
       }}
-      title={member.email}
+      title={email}
     >
-      {member.email?.slice(0, 2)}
+      {email.slice(0, 2)}
     </Avatar>
   )
 }

@@ -3,15 +3,13 @@
 import lunr from 'lunr'
 
 // Use Lunr's pipeline to tokenize content into keywords
-const lunrBuilder = lunr(function () {
-  this.field('content')
-})
+const lunrBuilder = new lunr.Builder()
+lunrBuilder.field('content')
 
 export function extractLunrKeywords(html: string) {
   const text = preprocessHtml(html)
   // Tokenize content
   const tokenizedWords: string[] = []
-  //@ts-ignore
   lunrBuilder.pipeline.run(lunr.tokenizer(text)).forEach((token) => {
     tokenizedWords.push(token.toString())
   })

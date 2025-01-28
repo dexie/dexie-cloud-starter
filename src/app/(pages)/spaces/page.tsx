@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import {
   Box,
@@ -8,33 +8,26 @@ import {
   Typography,
   alpha,
   TextField,
-} from "@mui/material"
-import { v4 as uuid } from "uuid"
-import BookmarksIcon from "@mui/icons-material/Bookmarks"
-import Dialog from "@mui/material/Dialog"
-import DialogContent from "@mui/material/DialogContent"
-import { createSpace, useLiveDataCards, useLiveDataSpaces } from "../../db/db"
-import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useSearch } from "../SearchContext"
-import WorkspacesIcon from "@mui/icons-material/Workspaces"
-import dayjs from "dayjs"
-import ItemCard, { FIXED_HEIGHT } from "@/app/components/ItemCard"
-import theme from "@/theme"
-import Link from "next/link"
-import Avatars from "@/app/components/Avatars"
+} from '@mui/material'
+import { v4 as uuid } from 'uuid'
+import BookmarksIcon from '@mui/icons-material/Bookmarks'
+import Dialog from '@mui/material/Dialog'
+import DialogContent from '@mui/material/DialogContent'
+import { createSpace, useLiveDataSpaces } from '../../db/db'
+import { useState } from 'react'
+import WorkspacesIcon from '@mui/icons-material/Workspaces'
+import dayjs from 'dayjs'
+import ItemCard, { FIXED_HEIGHT } from '@/app/components/ItemCard'
+import theme from '@/theme'
+import Link from 'next/link'
+import Avatars from '@/app/components/Avatars'
 export default function Spaces() {
-  const router = useRouter()
-  const { searchKeyword } = useSearch()
-  const [isModalEdit, setIsModalEdit] = useState<string | undefined>(undefined)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [newSpaceName, setNewSpaceName] = useState("")
+  const [newSpaceName, setNewSpaceName] = useState('')
 
   const spaces = useLiveDataSpaces()
 
   const handlePost = () => {
-    // Skapa en ny space
-    // Stäng modalen
     createSpace({
       id: uuid(),
       title: newSpaceName,
@@ -51,9 +44,9 @@ export default function Spaces() {
     <>
       <Box
         sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
         }}
       >
         <Typography variant="h5">All spaces</Typography>
@@ -61,34 +54,34 @@ export default function Spaces() {
           icon={<WorkspacesIcon />}
           label="New space"
           sx={{
-            padding: "20px 10px", // Ökar paddingen
-            backgroundColor: "white !important", // Vit bakgrund
-            borderRadius: "8px", // Om du vill runda hörnen lite mer
+            padding: '20px 10px',
+            backgroundColor: 'white !important',
+            borderRadius: '8px',
           }}
           onClick={() => setIsModalOpen(true)}
         />
       </Box>
       <Box
         sx={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-          gap: "20px",
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+          gap: '20px',
         }}
       >
         {spaces.map((space) => (
           <Link key={space.id} href={`/spaces/${space.id}`}>
             <Box
               sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "10px",
-                padding: "10px",
-                borderRadius: "6px",
-                position: "relative",
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '10px',
+                borderRadius: '6px',
+                position: 'relative',
               }}
             >
-              <Box sx={{ position: "absolute", right: 15, top: 15 }}>
+              <Box sx={{ position: 'absolute', right: 15, top: 15 }}>
                 <Avatars realmId={space?.realmId as string} compact />
               </Box>
               <Box
@@ -96,12 +89,12 @@ export default function Spaces() {
                   minHeight: FIXED_HEIGHT,
                   height: FIXED_HEIGHT,
                   maxHeight: FIXED_HEIGHT,
-                  backgroundColor: "white",
-                  borderRadius: "6px",
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
+                  backgroundColor: 'white',
+                  borderRadius: '6px',
+                  width: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
                 }}
               >
                 {space.cards.length > 0 ? (
@@ -128,12 +121,12 @@ export default function Spaces() {
       >
         <DialogContent
           sx={{
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "20px",
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '20px',
           }}
         >
           <Typography variant="h4">Create a new space</Typography>

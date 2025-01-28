@@ -10,7 +10,6 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import * as Y from 'yjs'
 import * as awarenessProtocol from 'y-protocols/awareness'
 import { docToHtml } from '../lib/docToHtml'
-import { debounce } from 'lodash'
 import { extractLunrKeywords } from './fullTextSearch'
 import { query } from '../lib/query'
 import { populate } from '../lib/populate'
@@ -72,7 +71,7 @@ export class DexieStarter extends Dexie {
 
     // A trigger to set the docHtml string attribute from Y.Doc content
     defineYDocTrigger(this.card, 'doc', async (ydoc, parentId) => {
-      const html = docToHtml(ydoc as any)
+      const html = docToHtml(ydoc as Y.Doc)
       await this.card.update(parentId, {
         docHtml: html,
         fullTextIndex: extractLunrKeywords(html),
@@ -96,7 +95,7 @@ export class DexieStarter extends Dexie {
       },
 
       // Enable Y.js awareness
-      awarenessProtocol: awarenessProtocol as any,
+      awarenessProtocol: awarenessProtocol,
 
       // Enable custom login GUI
       customLoginGui: true,
@@ -164,7 +163,7 @@ export const useLiveDataSpaces = (id?: string): ISpaceList[] => {
         const spaceCards = cards.filter((card) => card.realmId === space.id)
         return { ...space, cards: spaceCards }
       })
-    } catch (e) {
+    } catch {
       return []
     }
   }, []) as ISpaceList[]
@@ -210,14 +209,14 @@ export const useLiveDataCards = (
         // 3) Get the cards for the intersection (max 50 cards)
         return await db.card.bulkGet(intersection.slice(0, 50))
       }
-    } catch (e) {
+    } catch {
       return []
     }
   }, [keyword]) as ICard[]
 
   return (
     cards
-      ?.filter((c) => (spaceId ? c.spaceId === spaceId : true)) // NOTE(Bennie): Ask David too fix this and handle this the right way in query above.
+      ?.filter((c) => (spaceId ? c.spaceId === spaceId : true))
       ?.sort((a, b) => b.createdAt?.localeCompare(a.createdAt)) || []
   )
 }
@@ -225,7 +224,7 @@ export const useLiveDataCards = (
 export const getCardById = async (id: string): Promise<ICard | undefined> => {
   try {
     return await db.card.where('id').equals(id).first()
-  } catch (e) {
+  } catch {
     return
   }
 }
@@ -241,7 +240,7 @@ export const useLiveSpaceMembers = (space?: ISpaceList): DBRealmMember[] => {
         .toArray()
 
       return returnMembers
-    } catch (e) {
+    } catch {
       return []
     }
   }, [space]) as DBRealmMember[]
@@ -253,8 +252,7 @@ export const useLiveAllMembers = (): DBRealmMember[] => {
   const members = useLiveQuery(() => {
     try {
       return db.members.toArray()
-    } catch (e) {
-      // console.log(e)
+    } catch {
       return []
     }
   }, []) as DBRealmMember[]
@@ -262,67 +260,69 @@ export const useLiveAllMembers = (): DBRealmMember[] => {
   return members
 }
 
-export function shareSpaceList(space: ISpace, ...friends: any[]) {
+export function shareSpaceList(space: ISpace, ...friends: DBRealmMember[]) {
   return db
-    .transaction(
-      'rw',
-      [db.card, db.space as any, db.realms as any, db.members as any],
-      () => {
-        // Add or update a realm, tied to the todo-list using getTiedRealmId():
-        const realmId = getTiedRealmId(space.id || '')
-        space.realmId = realmId
+    .transaction('rw', [db.card, db.space, db.realms, db.members], () => {
+      // Add or update a realm, tied to the todo-list using getTiedRealmId():
+      const realmId = getTiedRealmId(space.id || '')
+      space.realmId = realmId
 
-        db.realms
-          .put({
-            realmId,
-            name: space.title,
-            represents: 'A shared space of inspiration',
-          })
-          .catch((e) => {
-            console.error('Error updating realm', e)
-          })
-
-        db.space.update(space.id, { realmId }).catch((e) => {
-          console.error('Error updating space', e)
+      db.realms
+        .put({
+          realmId,
+          name: space.title,
+          represents: 'A shared space of inspiration',
+        })
+        .catch((e) => {
+          console.error('Error updating realm', e)
         })
 
-        db.card
-          .where('spaceId')
-          .equals(space.id)
-          .modify({
-            realmId,
-          })
-          .catch((e) => {
-            console.error('Error updating card', e)
-          })
+      db.space.update(space.id, { realmId }).catch((e) => {
+        console.error('Error updating space', e)
+      })
 
-        // Add the members to share it to:
-        db.members
-          .bulkAdd(
-            friends.map((friend) => ({
-              realmId,
-              email: friend.email,
-              name: friend.name,
-              invite: true,
-              permissions: {
-                manage: '*', // Give your friend full permissions within this new realm.
-              },
-            })),
-          )
-          .catch((e) => {
-            console.error('Error updating members', e)
-          })
-      },
-    )
+      db.card
+        .where('spaceId')
+        .equals(space.id)
+        .modify({
+          realmId,
+        })
+        .catch((e) => {
+          console.error('Error updating card', e)
+        })
+
+      // Add the members to share it to:
+      db.members
+        .bulkAdd(
+          friends.map((friend) => ({
+            realmId,
+            email: friend.email,
+            name: friend.name,
+            invite: true,
+            permissions: {
+              manage: '*', // Give your friend full permissions within this new realm.
+            },
+          })),
+        )
+        .catch((e) => {
+          console.error('Error updating members', e)
+        })
+    })
     .catch((e) => {
       console.error(e)
     })
 }
 
-export function unshareSpaceList(object: any, members: any[]) {
+export function unshareSpaceList(object: ISpace, members: DBRealmMember[]) {
+  const realmId = object.realmId || ''
+
   return db.members
     .where('[email+realmId]')
-    .anyOf(members.map((member) => [member.email, object.realmId]))
+    .anyOf(
+      members.map(
+        (member) => [member.email ?? '', realmId] as [string, string],
+      ),
+    )
     .delete()
 }
 
@@ -337,7 +337,7 @@ try {
 
 const initializeDatabase = async () => {
   try {
-    db.on('blocked', (blocked: any) => {
+    db.on('blocked', (blocked) => {
       const errorMessage =
         'Database upgrade blocked. Please close other open tabs using this app.'
       console.error(errorMessage, blocked)
@@ -354,10 +354,9 @@ const initializeDatabase = async () => {
   }
 }
 
-// Starta databasen om vi är i en webbläsarmiljö
+// Start database initialization
 if (typeof window !== 'undefined') {
   initializeDatabase()
 }
 
-// Exportera databasens instans
 export { db }

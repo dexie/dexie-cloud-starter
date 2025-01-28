@@ -1,37 +1,33 @@
-"use client"
+'use client'
 
-import { use, useRef, useState } from "react"
-import { v4 as uuid } from "uuid"
-import { createCard, ICard } from "../db/db"
-import dayjs from "dayjs"
-import Tiptap from "@/app/components/tiptap"
-import theme from "@/theme"
-import Button from "@mui/material/Button"
-import { Typography, CardContent } from "@mui/material"
-import { useSearch } from "../(pages)/SearchContext"
-import { ContentCard, ContentWrapper } from "./ItemCard"
-import * as Y from "yjs"
-import { Editor } from "@tiptap/react"
+import { useRef, useState } from 'react'
+import { v4 as uuid } from 'uuid'
+import { createCard, ICard } from '../db/db'
+import dayjs from 'dayjs'
+import Tiptap from '@/app/components/tiptap'
+import theme from '@/theme'
+import Button from '@mui/material/Button'
+import { Typography, CardContent } from '@mui/material'
+import { useSearch } from '../(pages)/SearchContext'
+import { ContentCard, ContentWrapper } from './ItemCard'
+import * as Y from 'yjs'
+import { Editor } from '@tiptap/react'
 
 interface NewCardProps {
   spaceId?: string
 }
 
 const NewCard = ({ spaceId }: NewCardProps) => {
-  const [isEdited, setIsEdited] = useState(false)
   const [canPost, setCanPost] = useState(false)
-  const [isEditorEmpty, setIsEditorEmpty] = useState(true)
-  const [editorContent, setEditorContent] = useState("")
-  const [editor, setEditor] = useState<any>(null) // Ny state för editor-instansen
-  const { searchKeyword, setSearchKeyword } = useSearch()
-  const tempDoc = useState(() => new Y.Doc())[0]
-  const editorRef = useRef<Editor | null>(null);
 
-  // Funktion som körs när Ctrl+Enter eller Cmd+Enter trycks
+  const { setSearchKeyword } = useSearch()
+  const tempDoc = useState(() => new Y.Doc())[0]
+  const editorRef = useRef<Editor | null>(null)
+
   const handlePost = (yDoc: Y.Doc) => {
     const card = {
       id: uuid(),
-      type: "document",
+      type: 'document',
       doc: yDoc,
       createdAt: dayjs().toISOString(),
       spaceId: spaceId,
@@ -39,21 +35,13 @@ const NewCard = ({ spaceId }: NewCardProps) => {
 
     createCard(card)
     setCanPost(false)
-    setIsEdited(false)
-    setIsEditorEmpty(true)
-    setSearchKeyword("")
-
-    if (editor) {
-      editor.commands.setContent("") // Tömmer innehållet i editorn
-    }
-
-    setEditorContent("")
+    setSearchKeyword('')
   }
   return (
     <div>
       <ContentCard
         sx={{
-          position: "relative",
+          position: 'relative',
           pb: 4,
         }}
         isScaled={false}
@@ -64,7 +52,7 @@ const NewCard = ({ spaceId }: NewCardProps) => {
               variant="body2"
               sx={{
                 color: theme.palette.primary.main,
-                fontSize: "0.75rem",
+                fontSize: '0.75rem',
                 pb: 0.5,
               }}
             >
@@ -73,11 +61,8 @@ const NewCard = ({ spaceId }: NewCardProps) => {
 
             <Tiptap
               yDoc={tempDoc}
-              setIsEdited={setIsEdited}
               setCanPost={setCanPost}
-              setIsEditorEmpty={setIsEditorEmpty}
-              getContent={setEditorContent}
-              onPost={() => handlePost(tempDoc)} // Skicka in handlePost-funktionen
+              onPost={() => handlePost(tempDoc)}
               editorRef={editorRef}
             />
             {canPost && (
@@ -87,10 +72,10 @@ const NewCard = ({ spaceId }: NewCardProps) => {
                 onClick={() => handlePost(tempDoc)}
                 disabled={!canPost}
                 sx={{
-                  position: "absolute",
+                  position: 'absolute',
                   bottom: 0,
                   right: 0,
-                  width: "100%",
+                  width: '100%',
                   borderRadius: 0,
                 }}
               >

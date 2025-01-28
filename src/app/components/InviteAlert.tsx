@@ -1,14 +1,15 @@
-"use client"
+'use client'
 
-import { useObservable } from "dexie-react-hooks"
-import { Badge } from "@mui/material"
-import NotificationsIcon from "@mui/icons-material/Notifications"
-import { db } from "../db/db"
-import { useState, useEffect } from "react"
+import { useObservable } from 'dexie-react-hooks'
+import { Badge } from '@mui/material'
+import NotificationsIcon from '@mui/icons-material/Notifications'
+import { db } from '../db/db'
+import { useState, useEffect } from 'react'
+import { Invite } from 'dexie-cloud-addon'
 
 const InviteAlert = () => {
   const allInvites = useObservable(db.cloud.invites)
-  const [invites, setInvites] = useState<any[]>([])
+  const [invites, setInvites] = useState<Invite[]>([])
 
   useEffect(() => {
     if (allInvites) {
