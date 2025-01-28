@@ -43,7 +43,7 @@ h1 {
 
 ul,
 ol {
-  padding-left: 20px; /* Justera efter behov */
+  padding-left: 20px;
   margin-left: 0;
 }
 
@@ -66,8 +66,8 @@ li {
 }
 
 .ProseMirror-focused {
-  outline: none; /* Tar bort blå border */
-  box-shadow: none; /* Tar bort eventuell skugga */
+  outline: none;
+  box-shadow: none;
 }
 
 .ProseMirror .collaboration-cursor__caret {
@@ -101,11 +101,11 @@ li {
 }
 
 .editor-content p {
-  min-height: 1em; /* Sätter ett minimihöjd för att visa mellanrum */
+  min-height: 1em;
 }
 
 .editor-content p:empty::before {
-  content: '\00a0'; /* Tvingar en tom <p> att visa ett mellanrum */
+  content: '\00a0';
 }
 
 pre {
@@ -174,26 +174,22 @@ pre .hljs-strong {
   font-weight: 700;
 }
 
-/* Masonry container */
 .my-masonry-grid {
   display: flex;
-  margin-left: -30px; /* justera detta beroende på gapet */
+  margin-left: -30px;
   width: auto;
 }
 
-/* Kolumnklassen */
 .my-masonry-grid_column {
-  padding-left: 30px; /* justera detta beroende på gapet */
+  padding-left: 30px;
   background-clip: padding-box;
 }
 
-/* Varje enskilt kort i masonryn */
 .my-masonry-grid_column > div {
-  margin-bottom: 30px; /* justera detta beroende på önskat avstånd */
+  margin-bottom: 30px;
 }
 
 .MuiCardContent-root:last-child {
-  /* Sätt de stilar du vill ha här */
   padding-bottom: 16px !important;
 }
 

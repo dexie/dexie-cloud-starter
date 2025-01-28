@@ -317,7 +317,6 @@ export default function CardList({
         <DialogTitle id="alert-dialog-title">{'Share'}?</DialogTitle>
         <DialogContent>
           <Box>
-            {/* Ange här att vi använder vår typ AutoSelectMember */}
             <Autocomplete
               value={addFriendValue}
               onChange={(event, newValue) => {
