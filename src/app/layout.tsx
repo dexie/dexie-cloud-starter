@@ -6,6 +6,7 @@ import theme from '../theme'
 import { Caveat } from 'next/font/google'
 import { IBM_Plex_Sans } from 'next/font/google'
 import { IBM_Plex_Mono } from 'next/font/google'
+import LicenseAdvertise from './components/LicenseAdvertise'
 
 const ibmPlexSans = IBM_Plex_Sans({
   weight: ['300', '700'],
@@ -41,7 +42,10 @@ export default function RootLayout({
         className={`${ibmPlexSans.variable} ${ibmPlexMono.variable} ${caveat.variable}`}
       >
         <AppRouterCacheProvider>
-          <ThemeProvider theme={theme}>{children}</ThemeProvider>
+          <ThemeProvider theme={theme}>
+            {children}
+            <LicenseAdvertise />
+          </ThemeProvider>
         </AppRouterCacheProvider>
       </body>
     </html>
