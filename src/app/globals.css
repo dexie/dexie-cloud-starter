@@ -52,6 +52,12 @@ li {
   padding-left: 0;
 }
 
+.tiptap {
+  :first-child {
+    margin-top: 0;
+  }
+}
+
 .tiptap p.is-editor-empty:first-child::before {
   color: #adb5bd;
   content: attr(data-placeholder);
@@ -106,6 +112,12 @@ li {
 
 .editor-content p:empty::before {
   content: '\00a0';
+}
+
+blockquote {
+  border-left: 3px solid gray;
+  margin: 1.5rem 0;
+  padding-left: 1rem;
 }
 
 pre {

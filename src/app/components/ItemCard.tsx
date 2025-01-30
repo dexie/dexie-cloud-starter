@@ -75,7 +75,7 @@ const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
         setIsScaled(false)
       }
     }
-  }, [item.description])
+  }, [item.docHtml])
 
   // Ersätt `dexie://<id>` med blob-URL:er från Dexie
   useEffect(() => {
@@ -143,16 +143,15 @@ const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
         </Box>
       )}
       <ContentWrapper scaleFactor={scaleFactor}>
-        <div ref={contentRef}>
-          <CardContent>
-            <div
-              className="editor-content"
-              dangerouslySetInnerHTML={{
-                __html: processedHtml, // Använd den uppdaterade HTML-strängen med blob-URL:er
-              }}
-            />
-          </CardContent>
-        </div>
+        <CardContent>
+          <div
+            ref={contentRef}
+            className="editor-content"
+            dangerouslySetInnerHTML={{
+              __html: processedHtml, // Använd den uppdaterade HTML-strängen med blob-URL:er
+            }}
+          />
+        </CardContent>
       </ContentWrapper>
       {isScaled && (
         <div
