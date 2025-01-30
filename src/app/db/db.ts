@@ -13,6 +13,7 @@ import { docToHtml } from '../lib/docToHtml'
 import { extractLunrKeywords } from './fullTextSearch'
 import { query } from '../lib/query'
 import { populate } from '../lib/populate'
+import { Editor } from '@tiptap/react'
 
 export interface AutoSelectMember {
   inputValue?: string
@@ -21,10 +22,8 @@ export interface AutoSelectMember {
 }
 export interface ICard {
   id: string
-  type: 'image' | 'text' | 'document'
   createdAt: string
   title: string
-  content?: string[]
   doc: Y.Doc
   docHtml?: string
   fullTextIndex: string[]
@@ -39,6 +38,16 @@ export interface ISpace {
   title: string
   createdAt: string
   realmId?: string
+  owner?: string
+}
+
+export interface IImage {
+  id: string
+  createdAt: string
+  cardId?: string
+  file: Blob
+  fileType: string // ex. 'image/png' or 'image/jpeg'
+  realmId?: string
 }
 
 export interface ISpaceList extends ISpace {
@@ -48,6 +57,7 @@ export interface ISpaceList extends ISpace {
 export class DexieStarter extends Dexie {
   card!: Table<ICard, string>
   space!: Table<ISpace, string>
+  image!: Table<IImage, string>
 
   constructor() {
     super('DexieStarter', {
@@ -67,11 +77,16 @@ export class DexieStarter extends Dexie {
         id,
         title`,
       setting_local: '++id, key',
+      image: `
+        id,
+        cardId,
+        realmId
+    `,
     })
 
     // A trigger to set the docHtml string attribute from Y.Doc content
     defineYDocTrigger(this.card, 'doc', async (ydoc, parentId) => {
-      const html = docToHtml(ydoc as Y.Doc)
+      const html = await docToHtml(ydoc as Y.Doc)
       await this.card.update(parentId, {
         docHtml: html,
         fullTextIndex: extractLunrKeywords(html),
@@ -129,6 +144,57 @@ export const createCard = async (card: ICard) => {
   }
 }*/
 
+export async function addImageToCard(cardId: string, file: File) {
+  const card = await db.card.where('id').equals(cardId).first()
+  if (!card) {
+    console.error('Card not found for image')
+    return
+  }
+
+  const newImage: IImage = {
+    id: crypto.randomUUID(),
+    createdAt: new Date().toISOString(),
+    cardId,
+    file: file, // Dexie klarar av att lagra Blob/File direkt
+    fileType: file.type,
+    realmId: card?.realmId,
+  }
+  await db.image.add(newImage)
+  return newImage
+}
+
+export async function getImagesByCardId(cardId: string) {
+  return await db.image.where('cardId').equals(cardId).toArray()
+}
+
+export async function insertFirstCardImage(editor: Editor, cardId: string) {
+  const images = await getImagesByCardId(cardId)
+  if (!images.length) return
+
+  // Ta första bilden
+  const img = images[0]
+  const objectURL = URL.createObjectURL(img.file)
+
+  editor.chain().focus().setImage({ src: objectURL }).run()
+}
+
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = reject
+    reader.readAsDataURL(blob)
+  })
+}
+
+export async function insertCardImageAsBase64(editor: Editor, cardId: string) {
+  const images = await getImagesByCardId(cardId)
+  if (!images.length) return
+
+  const base64 = await blobToBase64(images[0].file)
+  editor.chain().focus().setImage({ src: base64 }).run()
+}
+
 export const updateCardTitle = async (id: string, title: string) => {
   try {
     await db.card.where('id').equals(id).modify({ title: title })
@@ -140,6 +206,7 @@ export const updateCardTitle = async (id: string, title: string) => {
 export const deleteCard = async (id: string) => {
   try {
     await db.card.where('id').equals(id).delete()
+    await db.image.where('cardId').equals(id).delete()
   } catch (e) {
     console.error(e)
   }

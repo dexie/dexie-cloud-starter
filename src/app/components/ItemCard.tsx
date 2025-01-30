@@ -2,9 +2,9 @@
 
 import React, { useRef, useState, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { CardContent, CardMedia } from '@mui/material'
+import { CardContent } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import { ICard } from '../db/db'
+import { ICard, db } from '../db/db' // Importera Dexie-databasen
 import Avatars from './Avatars'
 import { Box } from '@mui/system'
 
@@ -55,10 +55,14 @@ const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
   const [isScaled, setIsScaled] = useState(false)
   const [scaleFactor, setScaleFactor] = useState(1)
 
+  // Här lagrar vi den uppdaterade HTML-strängen med blob-URL:er
+  const [processedHtml, setProcessedHtml] = useState(item.docHtml || '')
+
   const handleClick = () => {
     router.push(`?edit=${item.id}`)
   }
 
+  // Höjdberäkning + ev. scaling
   useEffect(() => {
     if (contentRef.current) {
       const contentHeight = contentRef.current.scrollHeight
@@ -71,7 +75,60 @@ const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
         setIsScaled(false)
       }
     }
-  }, [item.description, item.content])
+  }, [item.description])
+
+  // Ersätt `dexie://<id>` med blob-URL:er från Dexie
+  useEffect(() => {
+    const replaceDexieUrls = async () => {
+      if (!item.docHtml) return
+
+      // Hitta alla "dexie://<id>" i HTML-strängen
+      const dexieUrls = item.docHtml.match(/dexie:\/\/[a-f0-9-]+/g) || []
+
+      if (dexieUrls.length === 0) {
+        setProcessedHtml(item.docHtml) // Om inga Dexie-URL:er finns, använd originaltexten
+        return
+      }
+
+      // Hämta bilder från Dexie och skapa blob-URL:er
+      const urlMap: { [key: string]: string } = {}
+
+      for (const dexieUrl of dexieUrls) {
+        const imageId = dexieUrl.replace('dexie://', '')
+        try {
+          const imageData = await db.image.get(imageId)
+          if (imageData?.file) {
+            const blobUrl = URL.createObjectURL(imageData.file)
+            urlMap[dexieUrl] = blobUrl
+          } else {
+            urlMap[dexieUrl] = '' // Om bilden saknas, ersätt med tom sträng
+          }
+        } catch (error) {
+          console.error(`Kunde inte ladda Dexie-bild: ${dexieUrl}`, error)
+          urlMap[dexieUrl] = ''
+        }
+      }
+
+      // Ersätt alla "dexie://<id>" i HTML-strängen med deras blob-URL
+      let updatedHtml = item.docHtml
+      for (const [dexieUrl, blobUrl] of Object.entries(urlMap)) {
+        updatedHtml = updatedHtml.replaceAll(dexieUrl, blobUrl)
+      }
+
+      setProcessedHtml(updatedHtml)
+    }
+
+    replaceDexieUrls()
+
+    return () => {
+      // Rensa blob-URL:er från minnet när komponenten avmonteras
+      Object.values(processedHtml).forEach((url) => {
+        if (url.startsWith('blob:')) {
+          URL.revokeObjectURL(url)
+        }
+      })
+    }
+  }, [item.docHtml])
 
   return (
     <ContentCard
@@ -87,31 +144,14 @@ const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
       )}
       <ContentWrapper scaleFactor={scaleFactor}>
         <div ref={contentRef}>
-          {(item.type === 'text' || item.type === 'document') && (
-            <CardContent>
-              <div
-                className="editor-content"
-                dangerouslySetInnerHTML={{
-                  __html: item?.docHtml || '',
-                }}
-              />
-            </CardContent>
-          )}
-          {item.type === 'image' && item.content && (
-            <>
-              <CardMedia
-                component="img"
-                image={item?.content[0]}
-                alt={item.description}
-                sx={{
-                  height: '200px',
-                  objectFit: 'cover',
-                  borderRadius: '6px 6px 0 0',
-                }}
-              />
-              <CardContent>{item.description}</CardContent>
-            </>
-          )}
+          <CardContent>
+            <div
+              className="editor-content"
+              dangerouslySetInnerHTML={{
+                __html: processedHtml, // Använd den uppdaterade HTML-strängen med blob-URL:er
+              }}
+            />
+          </CardContent>
         </div>
       </ContentWrapper>
       {isScaled && (

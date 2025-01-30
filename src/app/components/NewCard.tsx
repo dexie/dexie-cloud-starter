@@ -27,7 +27,6 @@ const NewCard = ({ spaceId }: NewCardProps) => {
   const handlePost = (yDoc: Y.Doc) => {
     const card = {
       id: uuid(),
-      type: 'document',
       doc: yDoc,
       createdAt: dayjs().toISOString(),
       spaceId: spaceId,
@@ -64,6 +63,7 @@ const NewCard = ({ spaceId }: NewCardProps) => {
               setCanPost={setCanPost}
               onPost={() => handlePost(tempDoc)}
               editorRef={editorRef}
+              cardId={''}
             />
             {canPost && (
               <Button

@@ -6,7 +6,6 @@ import { htmlToDoc } from './docToHtml'
 const cardItems = [
   {
     id: uuid(),
-    type: 'text',
     description: `
         <p><b>Dexie</b> stands tall, a database so light,<br /> 
         With <b>Dexie Cloud</b>, your data takes flight.<br />
@@ -22,8 +21,6 @@ const cardItems = [
   },
   {
     id: uuid(),
-    type: 'image',
-    content: ['https://picsum.photos/200'],
     description: 'Eames Lounge Chair',
     createdAt: dayjs().subtract(2, 'day').toISOString(),
   },
@@ -36,15 +33,11 @@ const cardItems = [
   },
   {
     id: uuid(),
-    type: 'image',
-    content: ['https://unsplash.it/200'],
     description: 'Real Estate',
     createdAt: dayjs().subtract(4, 'day').toISOString(),
   },
   {
     id: uuid(),
-    type: 'image',
-    content: ['https://loremflickr.com/200/200'],
     description: 'Furniture: Eames Lounge Chair',
     createdAt: dayjs().subtract(5, 'day').toISOString(),
   },

@@ -1,6 +1,7 @@
 import StarterKit from '@tiptap/starter-kit'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { common, createLowlight } from 'lowlight'
+import { DexieImageNode } from './extensions/DexieImageNode'
 
 export const commonTiptapExtensions = [
   StarterKit.configure({
@@ -10,6 +11,13 @@ export const commonTiptapExtensions = [
   CodeBlockLowlight.configure({
     lowlight: createLowlight(common),
     defaultLanguage: null,
+  }),
+  DexieImageNode.configure({
+    inline: false,
+    allowBase64: true,
+    HTMLAttributes: {
+      style: 'max-width: 100%; height: auto;',
+    },
   }),
 ]
 Object.freeze(commonTiptapExtensions)

@@ -7,6 +7,7 @@ import { Caveat } from 'next/font/google'
 import { IBM_Plex_Sans } from 'next/font/google'
 import { IBM_Plex_Mono } from 'next/font/google'
 import LicenseAdvertise from './components/LicenseAdvertise'
+import { Suspense } from 'react'
 
 const ibmPlexSans = IBM_Plex_Sans({
   weight: ['300', '700'],
@@ -44,7 +45,9 @@ export default function RootLayout({
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>
             {children}
-            <LicenseAdvertise />
+            <Suspense fallback={<></>}>
+              <LicenseAdvertise />
+            </Suspense>
           </ThemeProvider>
         </AppRouterCacheProvider>
       </body>

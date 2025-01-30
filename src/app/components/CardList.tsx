@@ -248,6 +248,7 @@ export default function CardList({
               editorRef={editorRef}
               setCanPost={() => {}}
               style={{ minHeight: '100%', width: '100%' }}
+              cardId={rowBeingEdited?.id || ''}
             />
           </Box>
           <Box

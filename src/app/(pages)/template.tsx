@@ -80,9 +80,11 @@ export default function Template({ children }: { children: ReactNode }) {
                   cursor: 'pointer',
                   color: theme.palette.primary.main,
                 }}
-                onClick={() => {
+                onClick={async () => {
                   if (confirm('Reset all stored data?')) {
                     db.card.clear()
+                    db.image.clear()
+                    db.space.clear()
                   }
                 }}
               >
