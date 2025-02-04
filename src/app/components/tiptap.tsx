@@ -13,12 +13,10 @@ import { DexieYProvider } from 'dexie'
 import { commonTiptapExtensions } from '@/app/lib/common-tiptap-extensions'
 import { hexify, stringToColor } from '@/app/lib/color-handling'
 import theme from '@/theme'
-import { DexieImageUpload } from '@/app/lib/extensions/DexieImageUpload'
 
 interface EditorProps {
   yDoc?: Y.Doc
   provider?: DexieYProvider<Y.Doc> | null
-  cardId: string
   style?: CSSProperties
   setCanPost: (canPost: boolean) => void
   onPost?: () => void
@@ -28,7 +26,6 @@ interface EditorProps {
 export default function Tiptap({
   yDoc,
   provider,
-  cardId,
   style,
   setCanPost,
   onPost,
@@ -43,22 +40,12 @@ export default function Tiptap({
     )
 
     return [
-      // Alla era övriga standard‐extensions:
       ...commonTiptapExtensions,
 
-      // Placeholder‐extension:
       Placeholder.configure({ placeholder: 'Write something …' }),
 
-      // Yjs Collaboration (delad doc):
       Collaboration.configure({ document: yDoc }),
 
-      // Pluggar in drag‐&‐släpp samt klistra in Dexie‐bilder:
-      DexieImageUpload.configure({
-        cardId,
-        getEditor: () => editorRef.current,
-      }),
-
-      // Om ni har realtidsmarkörer (cursors):
       ...(provider && currentUser?.isLoggedIn && currentUser?.name
         ? [
             CollaborationCursor.configure({
@@ -71,14 +58,14 @@ export default function Tiptap({
           ]
         : []),
     ]
-  }, [yDoc, provider, cardId, currentUser, editorRef])
+  }, [yDoc, provider, currentUser])
 
   const editor = useEditor(
     {
+      immediatelyRender: false,
       extensions,
       editorProps: {
         handleKeyDown(_, event) {
-          // Existerande logik för t.ex. Ctrl+Enter:
           if (
             (event.metaKey || event.ctrlKey) &&
             event.key === 'Enter' &&

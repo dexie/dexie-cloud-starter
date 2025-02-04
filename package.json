@@ -20,7 +20,7 @@
     "@tiptap/extension-code-block-lowlight": "^2.8.0",
     "@tiptap/extension-collaboration": "^2.8.0",
     "@tiptap/extension-collaboration-cursor": "^2.8.0",
-    "@tiptap/extension-image": "^2.11.3",
+    "@tiptap/extension-image": "^2.11.5",
     "@tiptap/extension-placeholder": "^2.8.0",
     "@tiptap/html": "^2.8.0",
     "@tiptap/pm": "^2.8.0",

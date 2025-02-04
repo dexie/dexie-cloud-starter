@@ -1,8 +1,9 @@
 import StarterKit from '@tiptap/starter-kit'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { common, createLowlight } from 'lowlight'
-import { DexieImageNode } from './extensions/DexieImageNode'
 import Blockquote from '@tiptap/extension-blockquote'
+import { Base64ImageUpload } from '../lib/extensions/Base64ImageUpload'
+import ImageResize from 'tiptap-extension-resize-image'
 
 export const commonTiptapExtensions = [
   StarterKit.configure({
@@ -15,12 +16,7 @@ export const commonTiptapExtensions = [
     lowlight: createLowlight(common),
     defaultLanguage: null,
   }),
-  DexieImageNode.configure({
-    inline: false,
-    allowBase64: true,
-    HTMLAttributes: {
-      style: 'max-width: 100%; height: auto;',
-    },
-  }),
+  ImageResize.configure({}),
+  Base64ImageUpload,
 ]
 Object.freeze(commonTiptapExtensions)

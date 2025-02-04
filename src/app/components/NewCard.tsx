@@ -35,6 +35,8 @@ const NewCard = ({ spaceId }: NewCardProps) => {
     createCard(card)
     setCanPost(false)
     setSearchKeyword('')
+
+    editorRef.current?.commands.setContent('')
   }
   return (
     <div>
@@ -63,7 +65,6 @@ const NewCard = ({ spaceId }: NewCardProps) => {
               setCanPost={setCanPost}
               onPost={() => handlePost(tempDoc)}
               editorRef={editorRef}
-              cardId={''}
             />
             {canPost && (
               <Button
