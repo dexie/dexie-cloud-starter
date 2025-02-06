@@ -60,6 +60,33 @@ export const Base64ImageUpload = Extension.create({
         key: new PluginKey('base64ImageUpload'),
         props: {
           handleDOMEvents: {
+            paste: (view, event: ClipboardEvent) => {
+              if (!event.clipboardData?.files?.length) return false
+              const files = event.clipboardData.files
+
+              event.preventDefault()
+              for (let i = 0; i < files.length; i++) {
+                const file = files[i]
+                if (!file.type.startsWith('image/')) return
+                const reader = new FileReader()
+                reader.onload = (readerEvent) => {
+                  const result = readerEvent.target?.result
+                  if (typeof result === 'string') {
+                    downscaleImage(result, 1024, 1024, 0.6)
+                      .then((resizedResult) => {
+                        const { state, dispatch } = view
+                        const imageNode = state.schema.nodes.image.create({
+                          src: resizedResult,
+                        })
+                        dispatch(state.tr.replaceSelectionWith(imageNode))
+                      })
+                      .catch((error) => console.error(error))
+                  }
+                }
+                reader.readAsDataURL(file)
+              }
+              return true
+            },
             drop: (view, event: DragEvent) => {
               const files = event.dataTransfer?.files
               if (!files || files.length === 0) return false
