@@ -1,9 +1,9 @@
 import dayjs from 'dayjs'
-import { ICard, db } from '../db/db'
+import type { ICard } from '../db/db'
 import { v4 as uuid } from 'uuid'
 import { htmlToDoc } from './docToHtml'
 
-const cardItems = [
+export const prepopulatedItems = [
   {
     id: uuid(),
     doc: htmlToDoc(`
@@ -52,32 +52,3 @@ const cardItems = [
     createdAt: dayjs().subtract(5, 'day').toISOString(),
   },
 ] as ICard[]
-
-export async function populate() {
-  // Wait for every initial phase to complete (load db, do inital sync, authenticate user completely):
-  await db.open()
-
-  console.log('Db is open now')
-
-  console.log('A full sync has taken place')
-
-  // At this point as we know that an authenticated sync has been completed,
-  // if db.card is empty, we're on a totally fresh new user.
-  if ((await db.card.count()) === 0) {
-    console.log('Populating the database with initial data')
-    await db.transaction('rw', db.card, async () => {
-      if ((await db.card.count()) > 0) return
-      await db.card.clear()
-      const cardsToInsert = cardItems.map((cardItem) => {
-        const cardToInsert: ICard = { ...cardItem }
-        if (cardItem.description) {
-          // Convert description HTML to Y.Doc before inserting to DB:
-          cardToInsert.doc = htmlToDoc(cardItem.description)
-          delete cardToInsert.description
-        }
-        return cardToInsert
-      })
-      await db.card.bulkAdd(cardsToInsert)
-    })
-  }
-}

@@ -14,7 +14,7 @@ import { Invite } from 'dexie-cloud-addon'
 
 export default function Invites() {
   const allInvites = useObservable(db.cloud.invites)
-  const invites = allInvites?.filter((i) => !i.accept && !i.reject)
+  const invites = allInvites?.filter((i) => !i.accepted && !i.rejected)
 
   return (
     <Box className="App" style={{ maxWidth: '900px', margin: 'auto' }}>

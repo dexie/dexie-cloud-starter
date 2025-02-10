@@ -99,7 +99,9 @@ export default function CardList({
 
   const rowBeingEdited = useLiveQuery(
     () =>
-      isModalEdit ? db.card.where('id').equals(isModalEdit).first() : undefined,
+      isModalEdit
+        ? db.cards.where('id').equals(isModalEdit).first()
+        : undefined,
     [isModalEdit],
   )
   const provider = useDocument(rowBeingEdited?.doc)
@@ -322,8 +324,11 @@ export default function CardList({
               onChange={(event, newValue) => {
                 if (typeof newValue === 'string') {
                   shareProject(newValue)
-                } else if (newValue && typeof newValue.title === 'string') {
-                  shareProject(newValue.title)
+                } else if (
+                  newValue &&
+                  typeof newValue.inputValue === 'string'
+                ) {
+                  shareProject(newValue.inputValue)
                 }
                 setAddFriendValue(null)
               }}

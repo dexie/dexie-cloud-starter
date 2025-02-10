@@ -21,10 +21,16 @@ const NewCard = ({ spaceId }: NewCardProps) => {
   const [canPost, setCanPost] = useState(false)
 
   const { setSearchKeyword } = useSearch()
-  const tempDoc = useState(() => new Y.Doc())[0]
+  const [tempDoc, setTempDoc] = useState(() => new Y.Doc())
   const editorRef = useRef<Editor | null>(null)
 
-  const handlePost = (yDoc: Y.Doc) => {
+  const handlePost = async (yDoc: Y.Doc) => {
+    // Reset the state and clear content by assigning a new empty doc
+    setTempDoc(new Y.Doc())
+    setCanPost(false)
+    setSearchKeyword('')
+
+    // Persist the new card
     const card = {
       id: uuid(),
       doc: yDoc,
@@ -32,11 +38,10 @@ const NewCard = ({ spaceId }: NewCardProps) => {
       spaceId: spaceId,
     } as ICard
 
-    createCard(card)
-    setCanPost(false)
-    setSearchKeyword('')
+    await createCard(card)
 
-    editorRef.current?.commands.setContent('')
+    // Give the editor focus again:
+    editorRef.current?.view?.focus()
   }
   return (
     <div>

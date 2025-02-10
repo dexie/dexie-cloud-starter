@@ -72,7 +72,6 @@ export default function Tiptap({
             onPost
           ) {
             onPost()
-            editorRef.current?.commands.setContent('')
             event.preventDefault()
             return true
           }

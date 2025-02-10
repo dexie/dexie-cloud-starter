@@ -82,9 +82,8 @@ export default function Template({ children }: { children: ReactNode }) {
                 }}
                 onClick={async () => {
                   if (confirm('Reset all stored data?')) {
-                    db.card.clear()
-                    db.image.clear()
-                    db.space.clear()
+                    db.cards.clear()
+                    db.spaces.clear()
                   }
                 }}
               >
