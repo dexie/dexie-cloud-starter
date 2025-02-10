@@ -115,6 +115,7 @@ export default function Template({ children }: { children: ReactNode }) {
                   borderTop: `solid 4px transparent`,
                   pt: 1,
                   color: theme.palette.primary.main,
+                  cursor: 'pointer',
                 }}
                 onClick={() => {
                   if (confirm('Logout and remove local database?')) {

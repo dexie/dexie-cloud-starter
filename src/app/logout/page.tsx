@@ -12,8 +12,6 @@ const Logout = () => {
 
   const dbName = 'DexieStarter-' + dbLink
 
-  console.log(dbName)
-
   const [message, setMessage] = useState('Logging out...')
   const logout = async () => {
     Dexie.exists(dbName)
