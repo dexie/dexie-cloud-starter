@@ -1,5 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+type GithubUser = {
+  login: string
+  id: number
+  avatar_url: string
+  name: string
+  company: string
+  location: string
+  email: string
+  notification_email: string
+}
+
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
@@ -47,8 +58,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const accessToken = tokenData.access_token
 
-    // Steg 2: Get the user's email address from GitHub
-    const emailResponse = await fetch('https://api.github.com/user/emails', {
+    const user: GithubUser = await fetch('https://api.github.com/user', {
+      headers: {
+        Accept: 'application/vnd.github.v3+json',
+        Authorization: `token ${accessToken}`,
+      },
+    }).then((res) => res.json())
+
+    // Steg 2: Get user's email from GitHub
+    /*const emailResponse = await fetch('https://api.github.com/user/emails', {
       headers: {
         Accept: 'application/vnd.github.v3+json',
         Authorization: `token ${accessToken}`,
@@ -66,6 +84,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         (emailObj: { primary: boolean; email: string }) => emailObj.primary,
       ) || emails[0]
     const email = primaryEmailObj.email
+    */
 
     // Steg 3: Get an OTP from Dexie Cloud
     const dexieResponse = await fetch(`${dexieBaseUrl}/token`, {
@@ -81,8 +100,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         scopes: ['ACCESS_DB'],
         emal_verified: true,
         claims: {
-          sub: email,
-          email: email,
+          sub: user.email,
+          email: user.email,
+          name: user.name,
+        },
+        data: {
+          avatar_url: user.avatar_url,
         },
       }),
     })
@@ -106,7 +129,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // Redirect to the OTP page with the email and OTP for automatic login
     const currentUrl = new URL(request.url)
-    const redirectUrl = `${currentUrl.origin}/?email=${email}&otp=${otpData.otp}&otpId=${otpData.otp_id}`
+    const redirectUrl = `${currentUrl.origin}/?email=${user.email}&otp=${otpData.otp}&otpId=${otpData.otp_id}`
 
     return NextResponse.redirect(redirectUrl)
   } catch (error) {
