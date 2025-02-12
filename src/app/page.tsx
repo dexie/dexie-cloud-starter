@@ -1,5 +1,10 @@
-import { redirect } from 'next/navigation';
+'use client'
 
-export default function HomePage() {
-  redirect('/everything');
+import CardList from '@/app/components/CardList'
+import { useSearch } from './(pages)/SearchContext'
+
+export default function Everything() {
+  const { searchKeyword } = useSearch()
+
+  return <CardList searchKeyword={searchKeyword} />
 }

@@ -14,15 +14,16 @@ import { useObservable } from 'dexie-react-hooks'
 import { useRouter } from 'next/navigation'
 import HistoryIcon from '@mui/icons-material/History'
 import { ReactNode } from 'react'
-import { db } from '../db/db'
 import React from 'react'
-import { SearchProvider, useSearch } from './SearchContext'
-import { NavItem } from '../components/NavItem'
-import { deleteUserAccount } from '../lib/delete-account'
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove'
 import LogoutIcon from '@mui/icons-material/Logout'
-import { InviteAlert } from '../components/InviteAlert'
-import UserInteractionWrapper from '../components/UserInteractionWrapper'
+import { SearchProvider, useSearch } from './(pages)/SearchContext'
+import { InviteAlert } from './components/InviteAlert'
+import { NavItem } from './components/NavItem'
+import UserInteractionWrapper from './components/UserInteractionWrapper'
+import { db } from './db/db'
+import { deleteUserAccount } from './lib/delete-account'
+import RemoveAutologinQuery from './components/RemoveAutologinQuery'
 
 export default function Template({ children }: { children: ReactNode }) {
   const router = useRouter()
@@ -34,6 +35,7 @@ export default function Template({ children }: { children: ReactNode }) {
 
   return (
     <UserInteractionWrapper>
+      <RemoveAutologinQuery />
       <SearchProvider>
         <Container
           maxWidth={false}
@@ -67,7 +69,7 @@ export default function Template({ children }: { children: ReactNode }) {
               >
                 <InviteAlert />
               </Box>
-              <NavItem name="Everything" href="/everything" />
+              <NavItem name="Everything" href="/" />
               <NavItem name="Spaces" href="/spaces" />
 
               <Typography
