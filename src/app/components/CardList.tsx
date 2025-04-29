@@ -28,6 +28,7 @@ import {
   AutoSelectMember,
   db,
   deleteCard,
+  ICard,
   shareSpaceList,
   unshareSpaceList,
   updateCardTitle,
@@ -96,6 +97,22 @@ export default function CardList({
 
   const editorRef = useRef<Editor | null>(null)
 
+  const [editorDocument, setEditorDocument] = useState<ICard | undefined>(
+    undefined,
+  )
+
+  useEffect(() => {
+    if (isModalEdit) {
+      const loadDoc = async () => {
+        const card = await db.cards.where('id').equals(isModalEdit).first()
+        setEditorDocument(card)
+      }
+      loadDoc()
+    } else {
+      setEditorDocument(undefined)
+    }
+  }, [isModalEdit])
+
   const rowBeingEdited = useLiveQuery(
     () =>
       isModalEdit
@@ -103,7 +120,7 @@ export default function CardList({
         : undefined,
     [isModalEdit],
   )
-  const provider = useDocument(rowBeingEdited?.doc)
+  const provider = useDocument(editorDocument?.doc)
 
   const closeModal = () => {
     setIsModalEdit(undefined)

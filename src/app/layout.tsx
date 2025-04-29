@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-sync-scripts */
 import type { Metadata } from 'next'
 import './globals.css'
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter'
@@ -50,6 +51,10 @@ export default function RootLayout({
             </Suspense>
           </ThemeProvider>
         </AppRouterCacheProvider>
+        <script
+          src="//unpkg.com/react-scan/dist/auto.global.js"
+          crossOrigin="anonymous"
+        />
       </body>
     </html>
   )
