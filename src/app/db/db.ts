@@ -1,6 +1,7 @@
 'use client'
 
 import Dexie, { Table } from 'dexie'
+import yDexie from 'y-dexie'
 import dexieCloud, {
   DBRealmMember,
   defineYDocTrigger,
@@ -8,7 +9,6 @@ import dexieCloud, {
 } from 'dexie-cloud-addon'
 import { useLiveQuery } from 'dexie-react-hooks'
 import * as Y from 'yjs'
-import * as awarenessProtocol from 'y-protocols/awareness'
 import { docToHtml } from '../lib/docToHtml'
 import { extractLunrKeywords } from './fullTextSearch'
 import { query } from '../lib/query'
@@ -49,8 +49,7 @@ export class DexieStarter extends Dexie {
 
   constructor() {
     super('DexieStarter', {
-      Y, // Provide the Y library here to allow Y.js integration
-      addons: [dexieCloud],
+      addons: [yDexie, dexieCloud],
     })
 
     this.version(1).stores({
@@ -58,7 +57,7 @@ export class DexieStarter extends Dexie {
         id,
         realmId,
         *fullTextIndex,
-        doc:Y,
+        doc:Y.Doc,
         spaceId`,
       spaces: `
         id,
@@ -90,9 +89,6 @@ export class DexieStarter extends Dexie {
           'fullTextIndex', // fullTextIndex is the searchable lunr words extracted from docHtml
         ] satisfies (keyof ICard)[], // ('satisfies' gives us stricter typings for the property names in the list)
       } satisfies { [TableName in keyof DexieStarter]?: string[] }, // 'satisfies' detects renames of tables
-
-      // Enable Y.js awareness
-      awarenessProtocol: awarenessProtocol,
 
       // Enable custom login GUI
       customLoginGui: true,

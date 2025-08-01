@@ -9,14 +9,14 @@ import { alpha } from '@mui/material'
 import * as Y from 'yjs'
 import { useObservable } from 'dexie-react-hooks'
 import { db } from '@/app/db/db'
-import { DexieYProvider } from 'dexie'
+import { DexieYProvider } from 'y-dexie'
 import { commonTiptapExtensions } from '@/app/lib/common-tiptap-extensions'
 import { hexify, stringToColor } from '@/app/lib/color-handling'
 import theme from '@/theme'
 
 interface EditorProps {
   yDoc?: Y.Doc
-  provider?: DexieYProvider<Y.Doc> | null
+  provider?: DexieYProvider | null
   style?: CSSProperties
   setCanPost: (canPost: boolean) => void
   onPost?: () => void
