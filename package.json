@@ -46,15 +46,15 @@
     "yjs": "^13.6.19"
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.10",
-    "@types/node": "^20",
-    "@types/qs": "^6.9.16",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
+    "@types/lodash": "^4.17.21",
+    "@types/node": "^20.19.25",
+    "@types/qs": "^6.14.0",
+    "@types/react": "^18.3.27",
+    "@types/react-dom": "^18.3.7",
     "@types/uuid": "^10.0.0",
-    "eslint": "^8",
-    "eslint-config-next": "14.2.15",
-    "prettier": "^3.3.3",
-    "typescript": "^5"
+    "eslint": "^8.57.1",
+    "eslint-config-next": "14.2.33",
+    "prettier": "^3.7.3",
+    "typescript": "^5.9.3"
   }
 }
