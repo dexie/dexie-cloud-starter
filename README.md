@@ -1,6 +1,8 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdexie%2Fdexie-cloud-starter.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdexie%2Fdexie-cloud-starter?ref=badge_shield)
+
 
 First, create a database in Dexie Cloud
 
@@ -54,3 +56,7 @@ The app comes with email One-Time Password login out of the box. To add Github S
 - NEXT_PUBLIC_GITHUB_REDIRECT_URI=http://localhost:3000/api/auth/callback/github
 - DEXIE_CLOUD_CLIENT_ID=(this value comes from your dexie-cloud.key file)
 - DEXIE_CLOUD_CLIENT_SECRET=(this value comes from your dexie-cloud.key file)
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdexie%2Fdexie-cloud-starter.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdexie%2Fdexie-cloud-starter?ref=badge_large)
