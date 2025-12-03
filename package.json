@@ -40,7 +40,7 @@
     "react-dom": "^18",
     "react-masonry-css": "^1.0.16",
     "tiptap-extension-resize-image": "^1.2.1",
-    "uuid": "^10.0.0",
+    "uuid": "^13.0.0",
     "y-dexie": "^4.2.0",
     "y-protocols": "^1.0.6",
     "yjs": "^13.6.27"
