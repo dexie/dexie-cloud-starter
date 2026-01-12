@@ -16,7 +16,7 @@
     "@emotion/cache": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^6.5.0",
-    "@mui/material-nextjs": "^7.3.6",
+    "@mui/material-nextjs": "^7.3.7",
     "@tiptap/extension-code-block-lowlight": "^2.8.0",
     "@tiptap/extension-collaboration": "^2.8.0",
     "@tiptap/extension-collaboration-cursor": "^2.8.0",
