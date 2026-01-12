@@ -29,7 +29,7 @@
     "@types/lunr": "^2.3.7",
     "dayjs": "^1.11.19",
     "dexie": "^4.2.1",
-    "dexie-cloud-addon": "^4.2.4",
+    "dexie-cloud-addon": "^4.2.5",
     "dexie-react-hooks": "^4.2.0",
     "lodash": "^4.17.21",
     "lowlight": "^3.3.0",
