@@ -16,7 +16,7 @@
     "@emotion/cache": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^6.5.0",
-    "@mui/material-nextjs": "^7.3.6",
+    "@mui/material-nextjs": "^7.3.7",
     "@tiptap/extension-code-block-lowlight": "^2.8.0",
     "@tiptap/extension-collaboration": "^2.8.0",
     "@tiptap/extension-collaboration-cursor": "^2.8.0",
@@ -42,19 +42,19 @@
     "tiptap-extension-resize-image": "^1.2.1",
     "uuid": "^13.0.0",
     "y-dexie": "^4.2.2",
-    "y-protocols": "^1.0.7",
-    "yjs": "^13.6.27"
+    "y-protocols": "^1.0.6",
+    "yjs": "^13.6.29"
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.21",
-    "@types/node": "^24.10.4",
+    "@types/lodash": "^4.17.23",
+    "@types/node": "^24.10.13",
     "@types/qs": "^6.14.0",
-    "@types/react": "^18.3.27",
+    "@types/react": "^18.3.28",
     "@types/react-dom": "^18.3.7",
     "@types/uuid": "^11.0.0",
     "eslint": "^9.39.2",
-    "eslint-config-next": "^16.0.10",
-    "prettier": "^3.7.4",
+    "eslint-config-next": "^16.1.6",
+    "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   }
 }
