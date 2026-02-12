@@ -43,7 +43,7 @@
     "uuid": "^13.0.0",
     "y-dexie": "^4.2.2",
     "y-protocols": "^1.0.6",
-    "yjs": "^13.6.27"
+    "yjs": "^13.6.29"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.21",
