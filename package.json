@@ -31,7 +31,7 @@
     "dexie": "^4.3.0",
     "dexie-cloud-addon": "^4.3.9",
     "dexie-react-hooks": "^4.2.0",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "lowlight": "^3.3.0",
     "lunr": "^2.3.9",
     "next": "^15.5.9",
