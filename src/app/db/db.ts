@@ -43,6 +43,13 @@ export interface ISpaceList extends ISpace {
   cards: ICard[]
 }
 
+// Demo-user login support: when ?demoUser=alice@demo.local is present in
+// the URL, auto-authenticate that user (used for automated/local testing).
+const demoUser =
+  typeof window !== 'undefined'
+    ? new URLSearchParams(window.location.search).get('demoUser') ?? undefined
+    : undefined
+
 export class DexieStarter extends Dexie {
   cards!: Table<ICard, string>
   spaces!: Table<ISpace, string>
@@ -94,12 +101,18 @@ export class DexieStarter extends Dexie {
       customLoginGui: true,
 
       // Require authentication
-      requireAuth: {
-        // allow magic email links to auto-login user
-        email: query.email?.toString(),
-        otpId: query.otpId?.toString(),
-        otp: query.otp?.toString(),
-      },
+      requireAuth: demoUser
+        ? // Auto-login as demo user (LoginHint shape) — enables automated testing
+          {
+            email: demoUser,
+            grant_type: 'demo',
+          }
+        : {
+            // allow magic email links to auto-login user
+            email: query.email?.toString(),
+            otpId: query.otpId?.toString(),
+            otp: query.otp?.toString(),
+          },
     })
 
     this.on('ready', async (vipDB) => {
