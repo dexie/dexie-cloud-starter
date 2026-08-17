@@ -29,7 +29,7 @@
     "@tiptap/react": "^2.8.0",
     "@tiptap/starter-kit": "^2.8.0",
     "@types/lunr": "^2.3.7",
-    "dayjs": "^1.11.19",
+    "dayjs": "^1.11.22",
     "dexie": "^4.3.0",
     "dexie-cloud-addon": "^4.3.9",
     "dexie-react-hooks": "^4.2.0",
