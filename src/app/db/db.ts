@@ -171,7 +171,6 @@ export const createSpace = async (card: ISpace) => {
  * authority if a stale client invokes the operation.
  */
 export const deleteSpace = async (space: ISpace) => {
-  const currentUserId = db.cloud.currentUserId
   const tiedRealmId = getTiedRealmId(space.id)
 
   await db.transaction('rw', [db.cards, db.spaces, db.realms], async () => {
