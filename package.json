@@ -50,13 +50,13 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.17.25",
-    "@types/node": "^24.13.6",
+    "@types/node": "^24.19.1",
     "@types/qs": "^6.15.1",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
     "eslint": "^9.39.5",
     "eslint-config-next": "^15.5.27",
-    "prettier": "^3.9.8",
+    "prettier": "^3.9.9",
     "typescript": "^5.9.3"
   },
   "overrides": {
