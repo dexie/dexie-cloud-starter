@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "node node_modules/@typescript/native/bin/tsc --noEmit",
     "test": "tsx --test tests/*.test.ts"
   },
   "prettier": {
@@ -60,7 +60,7 @@
     "@types/react-dom": "^19.3.0",
     "eslint": "^10.14.0",
     "prettier": "^3.9.10",
-    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
     "tsx": "^4.23.15",
     "jsdom": "^31.0.0",
     "@typescript/native": "npm:typescript@^7.0.2",
