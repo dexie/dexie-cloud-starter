@@ -25,11 +25,11 @@ The verified latest pair, Collaboration 3.33.0 and binding 3.2.0, supports prese
 
 The old starter pinned tiptap-extension-resize-image 1.2.1, which inherited the node name **image** and stored sizing in a style attribute. Version 1.4.7 independently changed that node to **imageResize**, creating the apparent migration obstacle. This is not a required Tiptap 3 transport change. Native Tiptap Image now supports resizing and keeps **image**, so the starter can remove the third-party extension while retaining the original node name. Base64 handling must remain enabled for uploads.
 
-A narrow compatibility attribute may preserve allowlisted legacy sizing/alignment. A name match is not a general attribute/style migration. Existing data already written as imageResize would need a deliberate alias/conversion; fresh customers do not need that machinery. Mixed old/new clients still require compatible schema deployment.
+The starter adds a narrow compatibility attribute that preserves the old style schema key while rendering only allowlisted legacy sizing/alignment; explicit native width/height take precedence after resize. A name match is not a general attribute/style migration. Existing data already written as imageResize would need a deliberate alias/conversion; fresh customers do not need that machinery. Mixed old/new clients still require compatible schema deployment.
 
 ## Lifecycle and offline considerations
 
-Tiptap React handles editor instance recreation and delayed teardown, but does not own external provider leases. Stable document/provider identities and updateUser avoid needless editor recreation and lost focus/history. Preserve balanced load/release under StrictMode, rapid navigation and multiple same-document views; the grace period is not proof against refcount leaks. The existing useDocument hook deserves an independent reproducer before making any core API change based only on a source-review concern.
+Tiptap React handles editor instance recreation and delayed teardown, but does not own external provider leases. Stable document/provider identities and updateUser avoid needless editor recreation and lost focus/history. Preserve balanced load/release under StrictMode, rapid navigation and multiple same-document views; the grace period is not proof against refcount leaks. The published dexie-react-hooks 4.4.0 useDocument hook has a reproduced pre-existing lease defect: an ordinary rerender changes its effect dependency token and releases the provider without reacquiring it; after the grace period the mounted document can be destroyed. This was independently reproduced with the actual hook/provider and observed in the app after a reload. It is not caused by Tiptap 3 and does not require a new synchronization protocol. The starter therefore uses an app-owned balanced effect lease (useDocumentLease); regression tests cover StrictMode, rerenders, document changes and concurrent consumers. An upstream hook implementation fix should be handled separately, not hidden as a Tiptap API redesign.
 
 Awareness is ephemeral. Offline document edits can persist locally; remote cursors cannot be guaranteed offline. Same-document views share one Awareness/clientID, so one view closing can clear the local cursor until the focused view republishes. Cloud rejection/deletion may destroy an active document; consumers must stop using it and follow an explicit recovery policy. Do not promise that rejected offline edits are automatically restored.
 
@@ -38,7 +38,8 @@ One installed Yjs version is necessary but insufficient: mixing CommonJS and ESM
 ## Optional simplifications, not required core changes
 
 - Use the current binding converter helpers instead of keeping a second y-prosemirror binding stack solely for export. Preserve fragment/schema round-trip tests.
-- Use native Image resizing to remove the third-party extension and its schema rename.
+- Use native Image resizing to remove the third-party extension and its schema rename, retaining only a small legacy style compatibility extension.
+- Pending image uploads must not use blindly mapped numeric positions through remote Yjs paragraph replacement. This starter cancels an upload when its pending target overlaps such a remote replacement, rather than inserting at a different position; retry the paste after the concurrent edit. Local edits and unrelated remote spans retain ordered insertion.
 - Stabilize extension identities and update user metadata without replacing the editor.
 - Document the generic provider/Awareness shape more precisely; no breaking Dexie API is required by the inspected code.
 
@@ -79,6 +80,6 @@ Dexie checkout reviewed at 45aade72aa19a601e6a13aa877beb7389e15b5d2 (published 4
 - addons/y-dexie/src/observeYDocUpdates.ts:52–65 remote provider origin,78–104 local persistence/updateV2.
 - addons/dexie-cloud/src/yjs/createYHandler.ts:38–125 Awareness creation/transport/cleanup.
 - addons/dexie-cloud/src/yjs/applyYMessages.ts:53–95 rejection/destruction and sync acknowledgment.
-- libs/dexie-react-hooks/src/useDocument.ts:13,35–69 ownership/grace and the lifecycle concern that warrants a separate focused reproducer.
+- libs/dexie-react-hooks/src/useDocument.ts:13,35–69 ownership/grace and the reproduced lifecycle defect described above; see starter tests/document-lease.test.ts for the app-owned lease regression.
 - https://github.com/dexie/Dexie.js/tree/45aade72aa19a601e6a13aa877beb7389e15b5d2/addons/y-dexie/src
 - https://github.com/dexie/Dexie.js/tree/45aade72aa19a601e6a13aa877beb7389e15b5d2/addons/dexie-cloud/src/yjs

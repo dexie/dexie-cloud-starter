@@ -1,7 +1,7 @@
 import StarterKit from '@tiptap/starter-kit'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { common, createLowlight } from 'lowlight'
-import Image from '@tiptap/extension-image'
+import { LegacyImage } from './extensions/LegacyImage'
 import { Base64ImageUpload } from './extensions/Base64ImageUpload'
 
 // Keep the persisted fragment and image node names stable.
@@ -16,16 +16,17 @@ export const commonTiptapExtensions = [
     lowlight: createLowlight(common),
     defaultLanguage: null,
   }),
-  Image.configure({ allowBase64: true }),
+  LegacyImage.configure({ allowBase64: true }),
 ]
 Object.freeze(commonTiptapExtensions)
 
 // Serialization uses the exact same schema, without upload handlers or resize
-// NodeViews. Native Image keeps the old `image` name and stores width/height.
+// NodeViews. Native Image keeps `image` and width/height; the shared extension
+// renders only allowlisted legacy sizing/alignment from old attrs.style.
 export const editorTiptapExtensions = [
   ...commonTiptapExtensions.map((extension) =>
     extension.name === 'image'
-      ? Image.configure({
+      ? LegacyImage.configure({
           allowBase64: true,
           resize: { enabled: true, alwaysPreserveAspectRatio: true },
         })

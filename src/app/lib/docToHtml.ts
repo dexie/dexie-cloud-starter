@@ -1,7 +1,7 @@
 import { generateHTML, generateJSON } from '@tiptap/html'
 import * as Y from 'yjs'
 import { yDocToProsemirrorJSON, prosemirrorJSONToYDoc } from '@tiptap/y-tiptap'
-import { useDocument } from 'dexie-react-hooks'
+import { useDocumentLease } from './useDocumentLease'
 import { getSchema } from '@tiptap/core'
 import {
   commonTiptapExtensions,
@@ -22,6 +22,6 @@ export function htmlToDoc(html: string) {
 }
 
 export function useDocToHtml(yDoc: Y.Doc | undefined): string {
-  useDocument(yDoc) // Loads the document; this hook owns only its own lease.
-  return yDoc ? docToHtml(yDoc) : ''
+  const provider = useDocumentLease(yDoc)
+  return provider?.doc ? docToHtml(provider.doc) : ''
 }
