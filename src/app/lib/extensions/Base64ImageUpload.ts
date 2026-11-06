@@ -1,159 +1,179 @@
 import { Extension } from '@tiptap/core'
-import { Plugin, PluginKey } from 'prosemirror-state'
+import { Fragment, Slice } from '@tiptap/pm/model'
+import {
+  Plugin,
+  PluginKey,
+  Selection,
+  SelectionBookmark,
+} from '@tiptap/pm/state'
+import type { EditorView } from '@tiptap/pm/view'
 
-function downscaleImage(
-  dataUrl: string,
-  maxWidth: number,
-  maxHeight: number,
-  quality: number = 0.8,
-): Promise<string> {
+function downscaleImage(dataUrl: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => {
-      let width = img.width
-      let height = img.height
-
-      if (width <= maxWidth && height <= maxHeight) {
-        return resolve(dataUrl)
-      }
-
-      const aspectRatio = width / height
-      if (width > height) {
-        width = maxWidth
-        height = Math.round(maxWidth / aspectRatio)
-        if (height > maxHeight) {
-          height = maxHeight
-          width = Math.round(maxHeight * aspectRatio)
-        }
-      } else {
-        height = maxHeight
-        width = Math.round(maxHeight * aspectRatio)
-        if (width > maxWidth) {
-          width = maxWidth
-          height = Math.round(maxWidth / aspectRatio)
-        }
-      }
-
+      const scale = Math.min(1, 1024 / img.width, 1024 / img.height)
+      if (scale === 1) return resolve(dataUrl)
       const canvas = document.createElement('canvas')
-      canvas.width = width
-      canvas.height = height
+      canvas.width = Math.max(1, Math.round(img.width * scale))
+      canvas.height = Math.max(1, Math.round(img.height * scale))
       const ctx = canvas.getContext('2d')
-      if (!ctx) {
-        return reject(new Error('Kunde inte skapa canvas context'))
-      }
-      ctx.drawImage(img, 0, 0, width, height)
-
-      const resizedDataUrl = canvas.toDataURL('image/jpeg', quality)
-      resolve(resizedDataUrl)
+      if (!ctx) return reject(new Error('Could not create an image canvas'))
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+      // Keep transparency for PNG/WebP rather than silently flattening to JPEG.
+      const type = /^data:image\/(png|webp)[;,]/i.exec(dataUrl)?.[1]
+      resolve(canvas.toDataURL(type ? 'image/' + type : 'image/jpeg', 0.6))
     }
-    img.onerror = (e) => reject(e)
+    img.onerror = () => reject(new Error('Could not decode the image'))
     img.src = dataUrl
   })
 }
+
+type PendingUploads = Map<number, SelectionBookmark>
+type UploadMeta =
+  { add: { id: number; bookmark: SelectionBookmark } } | { remove: number }
 
 export const Base64ImageUpload = Extension.create({
   name: 'base64ImageUpload',
 
   addProseMirrorPlugins() {
+    const key = new PluginKey<PendingUploads>('base64ImageUpload')
+    const readers = new Set<FileReader>()
+    let destroyed = false
+    let nextId = 0
+
+    const readImage = (file: File): Promise<string> =>
+      new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        readers.add(reader)
+        reader.onload = () => {
+          readers.delete(reader)
+          if (typeof reader.result === 'string') resolve(reader.result)
+          else reject(new Error('Could not read the image'))
+        }
+        reader.onerror = reader.onabort = () => {
+          readers.delete(reader)
+          reject(reader.error || new Error('Image reading was canceled'))
+        }
+        reader.readAsDataURL(file)
+      }).then(downscaleImage)
+
+    const upload = (
+      view: EditorView,
+      files: File[],
+      bookmark: SelectionBookmark,
+    ) => {
+      const id = nextId++
+      view.dispatch(
+        view.state.tr.setMeta(key, {
+          add: { id, bookmark },
+        } satisfies UploadMeta),
+      )
+      // One ordered insertion, even if file reads finish out of order. Mapping
+      // the bookmark through transactions keeps the original paste/drop target.
+      void Promise.allSettled(files.map(readImage)).then((results) => {
+        if (destroyed || view.isDestroyed) return
+        const pending = key.getState(view.state)?.get(id)
+        if (!pending) return
+        const tr = view.state.tr.setMeta(key, {
+          remove: id,
+        } satisfies UploadMeta)
+        const image = view.state.schema.nodes.image
+        const nodes = results.flatMap((result) => {
+          if (result.status === 'fulfilled')
+            return [image.create({ src: result.value })]
+          console.error('Image upload failed:', result.reason)
+          return []
+        })
+        if (view.editable && nodes.length > 0) {
+          tr.setSelection(pending.resolve(view.state.doc))
+          tr.replaceSelection(
+            new Slice(Fragment.fromArray(nodes), 0, 0),
+          ).scrollIntoView()
+        }
+        view.dispatch(tr)
+      })
+    }
+
+    const imageFiles = (transfer: DataTransfer): File[] => {
+      const files = Array.from(transfer.files)
+      const candidates = files.length
+        ? files
+        : Array.from(transfer.items || [])
+            .filter((item) => item.kind === 'file')
+            .map((item) => item.getAsFile())
+            .filter((file): file is File => file !== null)
+      // Leave ordinary text, HTML and mixed/non-image file transfers to the
+      // normal editor/browser handlers instead of swallowing their events.
+      if (
+        transfer.getData('text/plain') ||
+        transfer.getData('text/html') ||
+        candidates.some((file) => !file.type.startsWith('image/'))
+      )
+        return []
+      return candidates
+    }
+
     return [
-      new Plugin({
-        key: new PluginKey('base64ImageUpload'),
+      new Plugin<PendingUploads>({
+        key,
+        state: {
+          init: () => new Map(),
+          apply(tr, previous) {
+            const pending: PendingUploads = new Map()
+            previous.forEach((bookmark, id) =>
+              pending.set(id, bookmark.map(tr.mapping)),
+            )
+            const meta = tr.getMeta(key) as UploadMeta | undefined
+            if (meta && 'add' in meta)
+              pending.set(meta.add.id, meta.add.bookmark)
+            if (meta && 'remove' in meta) pending.delete(meta.remove)
+            return pending
+          },
+        },
+        view: () => {
+          destroyed = false
+          return {
+            destroy() {
+              destroyed = true
+              readers.forEach((reader) => reader.abort())
+              readers.clear()
+            },
+          }
+        },
         props: {
           handleDOMEvents: {
-            paste: (view, event: ClipboardEvent) => {
-              const clipboardData = event.clipboardData
-              if (!clipboardData) return false
-
-              // Försök först att använda clipboardData.files
-              if (clipboardData.files && clipboardData.files.length > 0) {
-                event.preventDefault()
-                for (let i = 0; i < clipboardData.files.length; i++) {
-                  const file = clipboardData.files[i]
-                  if (!file.type.startsWith('image/')) continue
-                  const reader = new FileReader()
-                  reader.onload = (readerEvent) => {
-                    const result = readerEvent.target?.result
-                    if (typeof result === 'string') {
-                      downscaleImage(result, 1024, 1024, 0.6)
-                        .then((resizedResult) => {
-                          const { state, dispatch } = view
-                          const imageNode = state.schema.nodes.image.create({
-                            src: resizedResult,
-                          })
-                          dispatch(state.tr.replaceSelectionWith(imageNode))
-                        })
-                        .catch((error) => console.error(error))
-                    }
-                  }
-                  reader.readAsDataURL(file)
-                }
-                return true
-              }
-
-              // Om inga filer hittas, kolla clipboardData.items
-              if (clipboardData.items && clipboardData.items.length > 0) {
-                event.preventDefault()
-                for (let i = 0; i < clipboardData.items.length; i++) {
-                  const item = clipboardData.items[i]
-                  if (!item.type.startsWith('image/')) continue
-                  const file = item.getAsFile()
-                  if (file) {
-                    const reader = new FileReader()
-                    reader.onload = (readerEvent) => {
-                      const result = readerEvent.target?.result
-                      if (typeof result === 'string') {
-                        downscaleImage(result, 1024, 1024, 0.6)
-                          .then((resizedResult) => {
-                            const { state, dispatch } = view
-                            const imageNode = state.schema.nodes.image.create({
-                              src: resizedResult,
-                            })
-                            dispatch(state.tr.replaceSelectionWith(imageNode))
-                          })
-                          .catch((error) => console.error(error))
-                      }
-                    }
-                    reader.readAsDataURL(file)
-                  }
-                }
-                return true
-              }
-              return false
-            },
-            drop: (view, event: DragEvent) => {
-              const files = event.dataTransfer?.files
-              if (!files || files.length === 0) return false
-
+            paste(view, event: ClipboardEvent) {
+              if (
+                !view.editable ||
+                !view.state.schema.nodes.image ||
+                !event.clipboardData
+              )
+                return false
+              const files = imageFiles(event.clipboardData)
+              if (!files.length) return false
               event.preventDefault()
-              const maxWidth = 1024
-              const maxHeight = 1024
-              const quality = 0.6
-
-              for (let i = 0; i < files.length; i++) {
-                const file = files[i]
-                if (file.type.startsWith('image/')) {
-                  const reader = new FileReader()
-                  reader.onload = (readerEvent) => {
-                    const result = readerEvent.target?.result
-                    if (typeof result === 'string') {
-                      downscaleImage(result, maxWidth, maxHeight, quality)
-                        .then((resizedResult) => {
-                          const { state, dispatch } = view
-                          const node = state.schema.nodes.image.create({
-                            src: resizedResult,
-                          })
-                          const transaction =
-                            state.tr.replaceSelectionWith(node)
-                          dispatch(transaction)
-                        })
-                        .catch((error) => {
-                          console.error('Nedskalning misslyckades:', error)
-                        })
-                    }
-                  }
-                  reader.readAsDataURL(file)
-                }
-              }
+              upload(view, files, view.state.selection.getBookmark())
+              return true
+            },
+            drop(view, event: DragEvent) {
+              if (
+                !view.editable ||
+                !view.state.schema.nodes.image ||
+                !event.dataTransfer
+              )
+                return false
+              const files = imageFiles(event.dataTransfer)
+              if (!files.length) return false
+              const position = view.posAtCoords({
+                left: event.clientX,
+                top: event.clientY,
+              })
+              const selection = position
+                ? Selection.near(view.state.doc.resolve(position.pos))
+                : view.state.selection
+              event.preventDefault()
+              upload(view, files, selection.getBookmark())
               return true
             },
           },

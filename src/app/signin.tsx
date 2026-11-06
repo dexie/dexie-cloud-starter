@@ -1,8 +1,7 @@
 'use client'
 
 import { useObservable } from 'dexie-react-hooks'
-import { useEffect, useRef, useState } from 'react'
-import Head from 'next/head'
+import { useRef, useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { DXCUserInteraction, resolveText } from 'dexie-cloud-addon'
@@ -73,19 +72,12 @@ export default function SignIn({
   const router = useRouter()
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'))
   const firstFieldRef = useRef<HTMLInputElement>(null)
-  const [success, setSuccess] = useState(false)
   const currenUser = useObservable(db.cloud.currentUser)
   const [isFocused, setIsFocused] = useState(false)
   const ENABLE_GITHUB_LOGIN = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID != null
 
-  useEffect(() => {
-    if (
-      currenUser?.userId != undefined &&
-      currenUser?.userId != 'unauthorized'
-    ) {
-      setSuccess(true)
-    }
-  }, [currenUser?.userId, router])
+  const success =
+    currenUser?.userId != undefined && currenUser.userId !== 'unauthorized'
 
   const signInWithGithub = () => {
     const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID
@@ -100,9 +92,7 @@ export default function SignIn({
 
   return (
     <StyledDiv>
-      <Head>
-        <title>Sign in</title>
-      </Head>
+      <title>Sign in</title>
       <Box
         style={{
           display: 'flex',
@@ -153,7 +143,7 @@ export default function SignIn({
               textAlign: 'center',
             }}
           >
-            {alerts.map((alert, i) => (
+            {alerts.map((alert) => (
               <Alert
                 severity={alert.type}
                 sx={{
@@ -162,7 +152,7 @@ export default function SignIn({
                   mt: 2,
                   borderRadius: '10px',
                 }}
-                key={i}
+                key={alert.type + resolveText(alert)}
               >
                 {resolveText(alert)}
               </Alert>
@@ -172,7 +162,7 @@ export default function SignIn({
                 [fieldName: string]: Field
               },
             ).map(([fieldName, { type, label, placeholder }], idx) => (
-              <Box key={idx}>
+              <Box key={fieldName}>
                 <h1 style={{}}>
                   {type != undefined && type == 'otp'
                     ? 'Code from email'
@@ -185,7 +175,7 @@ export default function SignIn({
                   }}
                 >
                   <TextField
-                    ref={idx === 0 ? firstFieldRef : undefined}
+                    inputRef={idx === 0 ? firstFieldRef : undefined}
                     autoFocus={isSmallScreen ? false : true}
                     key={type + ' ' + label + ' ' + placeholder}
                     type={type}
@@ -222,46 +212,48 @@ export default function SignIn({
                         marginLeft: '10px',
                       },
                     }}
-                    InputProps={{
-                      autoComplete:
-                        type != undefined && type == 'otp'
-                          ? 'one-time-code'
-                          : 'email',
-                      endAdornment: (
-                        <InputAdornment
-                          position="end"
-                          onClick={() => onSubmit(params)}
-                          style={{ cursor: 'pointer' }}
-                        >
-                          {onSubmit == undefined ? (
-                            <>
-                              {success ? (
-                                <Check
-                                  style={{
-                                    width: '32px',
-                                    color: theme.palette.primary.main,
-                                    marginRight: '2px',
-                                  }}
-                                />
-                              ) : (
-                                <CircularProgress
-                                  color={'primary'}
-                                  size={24}
-                                  sx={{ marginRight: '3px' }}
-                                />
-                              )}
-                            </>
-                          ) : (
-                            <ArrowCircleRight
-                              style={{
-                                height: '32px',
-                                width: '32px',
-                                color: theme.palette.text.disabled,
-                              }}
-                            />
-                          )}
-                        </InputAdornment>
-                      ),
+                    slotProps={{
+                      input: {
+                        autoComplete:
+                          type != undefined && type == 'otp'
+                            ? 'one-time-code'
+                            : 'email',
+                        endAdornment: (
+                          <InputAdornment
+                            position="end"
+                            onClick={() => onSubmit(params)}
+                            style={{ cursor: 'pointer' }}
+                          >
+                            {onSubmit == undefined ? (
+                              <>
+                                {success ? (
+                                  <Check
+                                    style={{
+                                      width: '32px',
+                                      color: theme.palette.primary.main,
+                                      marginRight: '2px',
+                                    }}
+                                  />
+                                ) : (
+                                  <CircularProgress
+                                    color={'primary'}
+                                    size={24}
+                                    sx={{ marginRight: '3px' }}
+                                  />
+                                )}
+                              </>
+                            ) : (
+                              <ArrowCircleRight
+                                style={{
+                                  height: '32px',
+                                  width: '32px',
+                                  color: theme.palette.text.disabled,
+                                }}
+                              />
+                            )}
+                          </InputAdornment>
+                        ),
+                      },
                     }}
                   />
                 </form>
@@ -363,7 +355,7 @@ export default function SignIn({
                     transition: 'opacity 0.3s',
                   }}
                   onClick={() => {
-                    window.location.href = '/'
+                    router.push('/')
                   }}
                 >
                   <ArrowBack

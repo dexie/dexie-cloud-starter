@@ -94,6 +94,9 @@ const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
             },
           }}
         >
+          {/* docHtml is a local-only projection: db.ts's Y.Doc trigger calls
+              docToHtml() with commonTiptapExtensions, not raw imported HTML. */}
+          {/* eslint-disable @eslint-react/dom-no-dangerously-set-innerhtml -- Render the schema-generated rich-text preview; docHtml is excluded from sync. */}
           <div
             ref={contentRef}
             className="editor-content"
@@ -101,6 +104,7 @@ const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
               __html: item.docHtml || '',
             }}
           />
+          {/* eslint-enable @eslint-react/dom-no-dangerously-set-innerhtml */}
         </CardContent>
       </ContentWrapper>
       {isScaled && (

@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import Head from 'next/head'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Dexie from 'dexie'
 
 const Logout = () => {
@@ -13,54 +13,43 @@ const Logout = () => {
   const dbName = 'DexieStarter-' + dbLink
 
   const [message, setMessage] = useState('Logging out...')
-  const logout = async () => {
-    Dexie.exists(dbName)
-      .then((dbExist) => {
-        if (dbExist) {
-          setMessage('Deleting database...' as string)
-          Dexie.delete(dbName)
-            .then(() => {})
-            .catch((error) => {
-              setMessage(error)
-              setTimeout(() => {
-                if (typeof window !== 'undefined') {
-                  window.location.reload()
-                }
-              }, 3000)
-            })
-            .finally(() => {
-              setMessage('Cleaning up...' as string)
-              setTimeout(() => {
-                if (typeof window !== 'undefined') {
-                  window.location.reload()
-                }
-              }, 3000)
-            })
+  const router = useRouter()
+
+  useEffect(() => {
+    let cancelled = false
+    let navigationTimer: ReturnType<typeof setTimeout> | undefined
+
+    async function logout() {
+      try {
+        const dbExists = await Dexie.exists(dbName)
+        if (cancelled) return
+
+        if (dbExists) {
+          setMessage('Deleting database...')
+          await Dexie.delete(dbName)
+          if (cancelled) return
+          setMessage('Cleaning up...')
+          navigationTimer = setTimeout(() => window.location.reload(), 3000)
         } else {
-          setMessage('Logging out...' as string)
-          setTimeout(() => {
-            if (typeof window !== 'undefined') {
-              window.location.href = '/'
-            }
-          }, 3000)
+          navigationTimer = setTimeout(() => router.replace('/'), 3000)
         }
-      })
-      .catch((error) => {
-        setTimeout(() => {
-          if (typeof window !== 'undefined') {
-            window.location.reload()
-          }
-        }, 3000)
-        setMessage(error)
-      })
-  }
-  logout()
+      } catch (error) {
+        if (cancelled) return
+        setMessage(error instanceof Error ? error.message : String(error))
+        navigationTimer = setTimeout(() => window.location.reload(), 3000)
+      }
+    }
+
+    void logout()
+    return () => {
+      cancelled = true
+      clearTimeout(navigationTimer)
+    }
+  }, [dbName, router])
 
   return (
     <>
-      <Head>
-        <title>{message}</title>
-      </Head>
+      <title>{message}</title>
       <div>{message}</div>
     </>
   )

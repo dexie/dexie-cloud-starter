@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, use, useState, ReactNode } from 'react'
 interface SearchContextType {
   searchKeyword: string
   setSearchKeyword: React.Dispatch<React.SetStateAction<string>>
@@ -9,7 +9,7 @@ interface SearchContextType {
 const SearchContext = createContext<SearchContextType | null>(null)
 
 export const useSearch = () => {
-  const context = useContext(SearchContext)
+  const context = use(SearchContext)
 
   if (!context) {
     throw new Error('useSearch must be used within a SearchProvider')
@@ -22,8 +22,8 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
   const [searchKeyword, setSearchKeyword] = useState('')
 
   return (
-    <SearchContext.Provider value={{ searchKeyword, setSearchKeyword }}>
+    <SearchContext value={{ searchKeyword, setSearchKeyword }}>
       {children}
-    </SearchContext.Provider>
+    </SearchContext>
   )
 }

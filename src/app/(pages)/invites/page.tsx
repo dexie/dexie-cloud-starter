@@ -6,7 +6,7 @@ import { Typography, alpha, Divider, Avatar, Box } from '@mui/material'
 import theme from '@/theme'
 import { invertColor, stringToColor } from '@/app/lib/color-handling'
 import {
-  CheckCircleOutline,
+  CheckCircleOutlined,
   HighlightOff,
   Notifications,
 } from '@mui/icons-material'
@@ -32,7 +32,7 @@ export default function Invites() {
               )
               .map((invite: Invite, i) => (
                 <Box
-                  key={'invite-' + i}
+                  key={invite.id}
                   style={{
                     padding: '30px',
                     userSelect: 'none',
@@ -50,7 +50,7 @@ export default function Invites() {
                   <>
                     {i > 0 && (
                       <Divider
-                        light={true}
+                        sx={{ opacity: 0.6 }}
                         style={{
                           width: '100%',
                           padding: '30px',
@@ -135,7 +135,7 @@ export default function Invites() {
                           marginRight: '30px',
                         }}
                       >
-                        <CheckCircleOutline
+                        <CheckCircleOutlined
                           style={{
                             width: '34px',
                             height: '34px',
