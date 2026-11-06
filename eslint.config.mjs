@@ -12,11 +12,15 @@ export default defineConfig([
   ...tseslint.configs.recommended,
   { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
   {
+    files: ['**/*.{js,jsx,ts,tsx}'],
+    plugins: { 'react-hooks': reactHooks },
+    rules: reactHooks.configs.recommended.rules,
+  },
+  {
     files: ['**/*.{jsx,tsx}'],
     extends: [react.configs['recommended-typescript']],
-    plugins: { 'react-hooks': reactHooks, '@next/next': next },
+    plugins: { '@next/next': next },
     rules: {
-      ...reactHooks.configs.recommended.rules,
       ...next.configs.recommended.rules,
       ...next.configs['core-web-vitals'].rules,
     },
