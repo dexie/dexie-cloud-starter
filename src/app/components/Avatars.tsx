@@ -83,10 +83,10 @@ const Avatars: FC<AvatarProp> = ({ realmId, selected, sx, single }) => {
   }, [currentUser?.userId, realmId, members, currentUser?.email, single])
 
   return (
-    <Box style={{ display: 'flex' }} alignItems="center">
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
       {avatars?.map((avatar, index) => (
         <Avatar
-          key={realmId + avatar.email + index}
+          key={realmId + avatar.email}
           sx={{
             ...sx,
             opacity: avatar.pending ? 0.25 : 1,

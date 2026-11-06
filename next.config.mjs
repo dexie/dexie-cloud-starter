@@ -2,18 +2,16 @@ import path from 'path'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Turbopack configuration (opt-in with: npm run dev -- --turbo)
+  // Next 16 uses Turbopack by default. All editor/provider imports must share
+  // one Yjs module instance (including HTML rendering and awareness).
   turbopack: {
     resolveAlias: {
-      yjs: path.resolve('node_modules/yjs/dist/yjs.cjs'),
+      yjs: path.resolve('node_modules/yjs/dist/yjs.mjs'),
     },
   },
-  // Webpack configuration (default)
-  webpack: (
-    config,
-    { buildId, dev, isServer, defaultLoaders, nextRuntime, webpack },
-  ) => {
-    config.resolve.alias.yjs = path.resolve('node_modules/yjs/dist/yjs.cjs')
+  // Keep the same module identity for the optional --webpack fallback.
+  webpack: (config) => {
+    config.resolve.alias.yjs = path.resolve('node_modules/yjs/dist/yjs.mjs')
     return config
   },
 }

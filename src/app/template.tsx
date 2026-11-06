@@ -154,10 +154,12 @@ function SearchField() {
       placeholder="Search my brain..."
       value={searchKeyword}
       onChange={(e) => setSearchKeyword(e.target.value)}
-      InputProps={{
-        style: {
-          font: '400 70px / 84px var(--font-caveat)',
-          fontStyle: 'italic',
+      slotProps={{
+        input: {
+          style: {
+            font: '400 70px / 84px var(--font-caveat)',
+            fontStyle: 'italic',
+          },
         },
       }}
       sx={{
