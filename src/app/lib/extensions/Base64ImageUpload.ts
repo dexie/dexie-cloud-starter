@@ -1,4 +1,5 @@
 import { Extension } from '@tiptap/core'
+import { ySyncPluginKey } from '@tiptap/y-tiptap'
 import { Fragment, Slice } from '@tiptap/pm/model'
 import {
   Plugin,
@@ -121,9 +122,30 @@ export const Base64ImageUpload = Extension.create({
           init: () => new Map(),
           apply(tr, previous) {
             const pending: PendingUploads = new Map()
-            previous.forEach((bookmark, id) =>
-              pending.set(id, bookmark.map(tr.mapping)),
-            )
+            // Yjs replaces PM spans when projecting remote changes. Numeric
+            // bookmarks in those spans cannot identify their logical target.
+            // Cancel rather than insert at the wrong target; paste again after
+            // the remote edit. Unrelated remote spans still map normally.
+            const remoteReplace = tr.docChanged &&
+              tr.getMeta(ySyncPluginKey)?.isChangeOrigin
+            previous.forEach((bookmark, id) => {
+              if (remoteReplace) {
+                const target = bookmark.resolve(tr.before)
+                let from = target.from
+                let to = target.to
+                for (const map of tr.mapping.maps) {
+                  let replaced = false
+                  map.forEach((start, end) => {
+                    if (end > start && start <= to && end >= from)
+                      replaced = true
+                  })
+                  if (replaced) return
+                  from = map.map(from)
+                  to = map.map(to)
+                }
+              }
+              pending.set(id, bookmark.map(tr.mapping))
+            })
             const meta = tr.getMeta(key) as UploadMeta | undefined
             if (meta && 'add' in meta)
               pending.set(meta.add.id, meta.add.bookmark)

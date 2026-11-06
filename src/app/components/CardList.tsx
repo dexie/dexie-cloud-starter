@@ -18,9 +18,7 @@ import { useRef, useState } from 'react'
 import Masonry from 'react-masonry-css'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
-import * as Y from 'yjs'
 import {
-  useDocument,
   useLiveQuery,
   useObservable,
   usePermissions,
@@ -49,6 +47,7 @@ import dynamic from 'next/dynamic'
 import Avatars from './Avatars'
 import { Editor } from '@tiptap/react'
 import { DBRealmMember } from 'dexie-cloud-addon'
+import { useDocumentLease } from '../lib/useDocumentLease'
 
 const Tiptap = dynamic(
   () => import('../components/tiptap').then((mod) => mod.default),
@@ -141,7 +140,7 @@ export default function CardList({
         : undefined,
     [isModalEdit],
   )
-  const provider = useDocument(rowBeingEdited?.doc)
+  const provider = useDocumentLease(rowBeingEdited?.doc)
 
   const closeModal = () => {
     router.push(pathname)
@@ -283,13 +282,17 @@ export default function CardList({
               minHeight: '100%',
             }}
           >
-            <Tiptap
-              yDoc={rowBeingEdited?.doc || new Y.Doc()}
-              provider={provider}
-              editorRef={editorRef}
-              setCanPost={() => {}}
-              style={{ minHeight: '100%', width: '100%' }}
-            />
+            {provider?.doc && provider.doc === rowBeingEdited?.doc ? (
+              <Tiptap
+                yDoc={provider.doc}
+                provider={provider}
+                editorRef={editorRef}
+                setCanPost={() => {}}
+                style={{ minHeight: '100%', width: '100%' }}
+              />
+            ) : (
+              <CircularProgress aria-label="Loading document" />
+            )}
           </Box>
           <Box
             sx={{

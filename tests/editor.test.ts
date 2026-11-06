@@ -110,6 +110,65 @@ test('HTML/Y.Doc roundtrip keeps default fragment, old image node name and commo
   }
 })
 
+test('legacy Yjs image style survives opening, export, edits and native resize without arbitrary CSS', () => {
+  const doc = new Y.Doc()
+  const image = new Y.XmlElement('image')
+  const style = 'width: 240px; height: auto; margin: 0 auto; display: block;'
+  image.setAttribute('src', 'data:image/png;base64,YQ==')
+  image.setAttribute('style', style)
+  const paragraph = new Y.XmlElement('paragraph')
+  const text = new Y.XmlText()
+  text.insert(0, 'Text')
+  paragraph.insert(0, [text])
+  doc.getXmlFragment('default').insert(0, [paragraph, image])
+  const peerDoc = new Y.Doc()
+  Y.applyUpdateV2(peerDoc, Y.encodeStateAsUpdateV2(doc))
+  const editor = collaborativeEditor(doc)
+  const peer = collaborativeEditor(peerDoc)
+  const forward = (update: Uint8Array) => Y.applyUpdateV2(peerDoc, update)
+  doc.on('updateV2', forward)
+  try {
+    assert.equal(editor.state.doc.child(1).attrs.style, style)
+    const beforeExport = Y.encodeStateAsUpdateV2(doc)
+    const exported = new DOMParser().parseFromString(docToHtml(doc), 'text/html')
+    assert.equal(exported.querySelector('img')?.style.width, '240px')
+    assert.equal(exported.querySelector('img')?.style.margin, '0px auto')
+    assert.deepEqual(Y.encodeStateAsUpdateV2(doc), beforeExport)
+    assert.equal(editor.view.dom.querySelector('img')?.style.width, '240px')
+    editor.commands.insertContentAt(1, 'Unrelated')
+    assert.equal(image.getAttribute('style'), style)
+    editor.chain().setNodeSelection(editor.state.doc.firstChild!.nodeSize).updateAttributes('image', { width: 320, height: 160 }).run()
+    assert.equal(image.getAttribute('style'), style)
+    assert.equal((peerDoc.getXmlFragment('default').get(1) as Y.XmlElement).getAttribute('style'), style)
+    assert.deepEqual(editor.getJSON(), peer.getJSON())
+    const resized = new DOMParser().parseFromString(docToHtml(doc), 'text/html').querySelector('img')!
+    assert.equal(resized.style.width, '320px')
+    assert.equal(resized.style.height, '160px')
+    assert.equal(resized.style.margin, '0px auto')
+    assert.equal(editor.view.dom.querySelector('img')?.style.width, '320px')
+    // Existing Yjs attrs bypass HTML parsing: render must sanitize as well.
+    editor.commands.updateAttributes('image', {
+      style: 'width: 25%; height: auto; margin: 0 0 0 auto; position: fixed; background: url(https://invalid.test/); width: expression(alert(1)); color: red !important;',
+    })
+    for (const html of [editor.getHTML(), docToHtml(doc)]) {
+      assert.doesNotMatch(html, /position|background|invalid.test|expression|important/)
+      assert.equal(new DOMParser().parseFromString(html, 'text/html').querySelector('img')?.style.marginLeft, 'auto')
+    }
+    const imported = htmlToDoc('<img src="data:image/png;base64,YQ==" style="width: 25%; margin: 0 auto; position: fixed; background: url(https://invalid.test/)">')
+    try {
+      const firstChild = yDocToProsemirrorJSON(imported, 'default').content?.[0]
+      assert.ok(firstChild && !Array.isArray(firstChild))
+      assert.equal(firstChild.attrs?.style, 'width: 25%; margin: 0 auto;')
+    } finally { imported.destroy() }
+  } finally {
+    doc.off('updateV2', forward)
+    editor.destroy()
+    peer.destroy()
+    doc.destroy()
+    peerDoc.destroy()
+  }
+})
+
 test('Node ESM selects the server HTML renderer without a browser global', () => {
   const result = spawnSync(
     process.execPath,
@@ -258,14 +317,16 @@ test('Caret uses supplied Awareness and teardown/remount does not destroy the sh
 
 type ControlledRead = { finish: (src: string) => void; aborted: boolean }
 const controlledReads: ControlledRead[] = []
+const controlledDecodes: Array<() => void> = []
 
-function mockImageIO() {
+function mockImageIO(holdDecode = false) {
   const originalReader = Object.getOwnPropertyDescriptor(
     globalThis,
     'FileReader',
   )
   const originalImage = Object.getOwnPropertyDescriptor(globalThis, 'Image')
   controlledReads.length = 0
+  controlledDecodes.length = 0
   class Reader {
     result: string | null = null
     error = null
@@ -292,7 +353,8 @@ function mockImageIO() {
     height = 10
     onload?: () => void
     set src(_value: string) {
-      queueMicrotask(() => this.onload?.())
+      if (holdDecode) controlledDecodes.push(() => this.onload?.())
+      else queueMicrotask(() => this.onload?.())
     }
   }
   Object.defineProperty(globalThis, 'FileReader', {
@@ -413,6 +475,53 @@ test('async image paste preserves file order and maps its original target throug
   } finally {
     editor.destroy()
     doc.destroy()
+    restore()
+  }
+})
+
+test('remote two-Y.Doc paragraph replacement during image decode cancels upload instead of inserting at a collapsed target', async () => {
+  const restore = mockImageIO(true)
+  const doc = htmlToDoc('<p>Before target after</p><p>Other</p>')
+  const peerDoc = new Y.Doc()
+  Y.applyUpdateV2(peerDoc, Y.encodeStateAsUpdateV2(doc))
+  const editor = collaborativeEditor(doc)
+  const peer = collaborativeEditor(peerDoc)
+  const remote = { source: 'peer' }
+  const forward = (update: Uint8Array) => Y.applyUpdateV2(doc, update, remote)
+  peerDoc.on('updateV2', forward)
+  try {
+    editor.commands.setTextSelection({ from: 8, to: 14 })
+    const bookmark = editor.state.selection.getBookmark()
+    const image = new dom.window.File(['x'], 'image.png', { type: 'image/png' })
+    assert.equal(paste(editor, transfer([image])).handled, true)
+    controlledReads[0].finish('data:image/png;base64,YQ==')
+    await settleUploads()
+    assert.equal(controlledDecodes.length, 1, 'decode is still pending')
+    let collapsed = false
+    editor.on('transaction', ({ transaction }) => {
+      if (transaction.docChanged) {
+        const mapped = bookmark.map(transaction.mapping).resolve(transaction.doc)
+        collapsed = mapped.empty
+      }
+    })
+    // A normal peer text edit makes this binding replace the changed paragraph.
+    peer.commands.insertContentAt(1, 'Remote ')
+    assert.equal(collapsed, true, 'reproduces incompatible numeric bookmark mapping')
+    assert.deepEqual(editor.getJSON(), peer.getJSON())
+    const beforeDecode = editor.getJSON()
+    const beforeUpdate = Y.encodeStateAsUpdateV2(doc)
+    controlledDecodes[0]()
+    await settleUploads()
+    assert.deepEqual(editor.getJSON(), beforeDecode)
+    assert.deepEqual(Y.encodeStateAsUpdateV2(doc), beforeUpdate)
+    assert.equal(editor.getJSON().content?.some((node) => node.type === 'image'), false)
+    assert.equal(editor.getText(), 'Remote Before target after\n\nOther')
+  } finally {
+    peerDoc.off('updateV2', forward)
+    editor.destroy()
+    peer.destroy()
+    doc.destroy()
+    peerDoc.destroy()
     restore()
   }
 })
