@@ -126,8 +126,8 @@ export const Base64ImageUpload = Extension.create({
             // bookmarks in those spans cannot identify their logical target.
             // Cancel rather than insert at the wrong target; paste again after
             // the remote edit. Unrelated remote spans still map normally.
-            const remoteReplace = tr.docChanged &&
-              tr.getMeta(ySyncPluginKey)?.isChangeOrigin
+            const remoteReplace =
+              tr.docChanged && tr.getMeta(ySyncPluginKey)?.isChangeOrigin
             previous.forEach((bookmark, id) => {
               if (remoteReplace) {
                 const target = bookmark.resolve(tr.before)
