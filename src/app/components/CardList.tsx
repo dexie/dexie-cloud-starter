@@ -14,10 +14,10 @@ import {
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
 import theme from '@/theme'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import Masonry from 'react-masonry-css'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import * as Y from 'yjs'
 import {
   useDocument,
@@ -101,7 +101,7 @@ function DeleteSpaceButton({ space }: { space: ISpaceList }) {
       }}
       onClick={handleDeleteSpace}
     >
-      <DeleteOutlineIcon />
+      <DeleteOutlinedIcon />
       Delete
     </Box>
   )
@@ -118,7 +118,7 @@ export default function CardList({
   const space = useLiveDataSpaces(spaceId)[0]
   const cards = useLiveDataCards(searchKeyword, spaceId)
 
-  const [isModalEdit, setIsModalEdit] = useState<string | undefined>(undefined)
+  const isModalEdit = searchParams.get('edit') || undefined
 
   const [showShareDialogOpen, setShowShareDialogOpen] = useState(false)
   const [addFriendValue, setAddFriendValue] = useState<AutoSelectMember | null>(
@@ -132,11 +132,6 @@ export default function CardList({
     email: '',
   }
 
-  useEffect(() => {
-    const modalParam = searchParams.get('edit')
-    setIsModalEdit(modalParam || undefined)
-  }, [searchParams])
-
   const editorRef = useRef<Editor | null>(null)
 
   const rowBeingEdited = useLiveQuery(
@@ -149,7 +144,6 @@ export default function CardList({
   const provider = useDocument(rowBeingEdited?.doc)
 
   const closeModal = () => {
-    setIsModalEdit(undefined)
     router.push(pathname)
   }
 
@@ -262,12 +256,14 @@ export default function CardList({
         maxWidth="lg"
         open={isModalEdit != undefined && rowBeingEdited != null}
         onClose={closeModal}
-        PaperProps={{
-          style: {
-            minHeight: '90%',
-            maxHeight: '90%',
-            minWidth: '90%',
-            maxWidth: '90%',
+        slotProps={{
+          paper: {
+            style: {
+              minHeight: '90%',
+              maxHeight: '90%',
+              minWidth: '90%',
+              maxWidth: '90%',
+            },
           },
         }}
       >
@@ -347,7 +343,7 @@ export default function CardList({
                   }
                 }}
               >
-                <DeleteOutlineIcon />
+                <DeleteOutlinedIcon />
               </Box>
               <Avatars realmId={rowBeingEdited?.realmId as string} compact />
             </Box>
@@ -485,9 +481,9 @@ export default function CardList({
                 <Divider />
                 {members != undefined && members.length > 0 ? (
                   <>
-                    {members?.map((member, i) => (
+                    {members?.map((member) => (
                       <ShareUserRow
-                        key={i}
+                        key={member.id}
                         member={member}
                         space={space}
                         deleteAction={deleteSharedUser}

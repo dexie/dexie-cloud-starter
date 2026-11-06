@@ -76,7 +76,7 @@ li {
   box-shadow: none;
 }
 
-.ProseMirror .collaboration-cursor__caret {
+.ProseMirror .collaboration-carets__caret {
   border-right: 1px solid black;
   border-left: 1px solid black;
   pointer-events: none;
@@ -86,7 +86,7 @@ li {
   overflow-wrap: break-word;
 }
 
-.ProseMirror .collaboration-cursor__label {
+.ProseMirror .collaboration-carets__label {
   border-radius: 4px;
   border-top-left-radius: 0;
   color: black;

@@ -11,6 +11,12 @@ const LicenseAdvertise = () => {
   const setting = searchParams.get('setting')
   const currentUser = useObservable(db.cloud.currentUser)
   const [snackbarOpen, setSnackbarOpen] = useState(true)
+  const [now, setNow] = useState(() => Date.now())
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 60_000)
+    return () => clearInterval(timer)
+  }, [])
 
   // Doing a sync after the snackbar state changes to fetch updates to the license
   // when offline the sync is turned of and a db.cloud.sync() will not be triggered
@@ -47,7 +53,7 @@ const LicenseAdvertise = () => {
   if (licenseExpiresInDays === undefined) {
     const validUntil = license.validUntil?.getTime() ?? Infinity
     licenseExpiresInDays = Math.round(
-      (validUntil! - Date.now()) / (24 * 60 * 60 * 1000),
+      (validUntil - now) / (24 * 60 * 60 * 1000),
     )
   }
 

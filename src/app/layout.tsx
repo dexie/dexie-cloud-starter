@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter'
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v16-appRouter'
 import { ThemeProvider } from '@mui/material/styles'
 import theme from '../theme'
 import { Caveat } from 'next/font/google'
