@@ -12,7 +12,7 @@ Candidate: `liz/starter-modernization-20261106`. No production deployment.
 
 ## Review-driven fixes
 
-Independent review of the initial candidate found a pre-existing published useDocument lease bug, legacy image-style compatibility loss, insufficient concurrent-upload target coverage, and missing hook lint coverage in non-JSX TypeScript. These findings are being addressed before final verification. No core Dexie API or protocol changes are included.
+Independent review of the initial candidate found a pre-existing published useDocument lease bug, legacy image-style compatibility loss, insufficient concurrent-upload target coverage, and missing hook lint coverage in non-JSX TypeScript. The starter-side findings are addressed by `useDocumentLease`, shared allowlisted legacy image support, remote-replacement upload cancellation, and expanded hook lint coverage, each with regressions. No core Dexie API or protocol changes are included. Final committed-diff review is pending CodeRabbit organization reauthorization; the required auth link was sent privately to the repo owner.
 
 ## Final local gates
 
@@ -33,4 +33,4 @@ Full-text search was exercised through the browser's search input against an own
 
 ## Hosted CI
 
-Pending final review, commit, focused PR creation, and hosted CI. No production deployment.
+Candidate commits are local; CodeRabbit final review is pending repo-owner reauthorization. The branch has not been pushed and no PR/hosted CI exists yet. No production deployment.
