@@ -6,6 +6,16 @@ import test from 'node:test'
 
 const require = createRequire(import.meta.url)
 
+test('React hook rules cover TypeScript files without JSX', async () => {
+  const { ESLint } = await import('eslint')
+  const eslint = new ESLint()
+  const results = await eslint.lintText(
+    "import { useEffect } from 'react'; export function useExample(enabled: boolean) { if (enabled) useEffect(() => {}, []); }",
+    { filePath: 'src/app/lib/hook-coverage-fixture.ts' },
+  )
+  assert.ok(results[0].messages.some(message => message.ruleId === 'react-hooks/rules-of-hooks'))
+})
+
 test('TypeScript 7 compiler and TypeScript 6 tool API are selected explicitly', () => {
   // The compatibility API also installs an older tsc binary transitively. Never
   // rely on which package last won node_modules/.bin/tsc during an install.
