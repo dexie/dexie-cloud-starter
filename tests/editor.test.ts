@@ -130,36 +130,62 @@ test('legacy Yjs image style survives opening, export, edits and native resize w
   try {
     assert.equal(editor.state.doc.child(1).attrs.style, style)
     const beforeExport = Y.encodeStateAsUpdateV2(doc)
-    const exported = new DOMParser().parseFromString(docToHtml(doc), 'text/html')
+    const exported = new DOMParser().parseFromString(
+      docToHtml(doc),
+      'text/html',
+    )
     assert.equal(exported.querySelector('img')?.style.width, '240px')
     assert.equal(exported.querySelector('img')?.style.margin, '0px auto')
     assert.deepEqual(Y.encodeStateAsUpdateV2(doc), beforeExport)
     assert.equal(editor.view.dom.querySelector('img')?.style.width, '240px')
     editor.commands.insertContentAt(1, 'Unrelated')
     assert.equal(image.getAttribute('style'), style)
-    editor.chain().setNodeSelection(editor.state.doc.firstChild!.nodeSize).updateAttributes('image', { width: 320, height: 160 }).run()
+    editor
+      .chain()
+      .setNodeSelection(editor.state.doc.firstChild!.nodeSize)
+      .updateAttributes('image', { width: 320, height: 160 })
+      .run()
     assert.equal(image.getAttribute('style'), style)
-    assert.equal((peerDoc.getXmlFragment('default').get(1) as Y.XmlElement).getAttribute('style'), style)
+    assert.equal(
+      (peerDoc.getXmlFragment('default').get(1) as Y.XmlElement).getAttribute(
+        'style',
+      ),
+      style,
+    )
     assert.deepEqual(editor.getJSON(), peer.getJSON())
-    const resized = new DOMParser().parseFromString(docToHtml(doc), 'text/html').querySelector('img')!
+    const resized = new DOMParser()
+      .parseFromString(docToHtml(doc), 'text/html')
+      .querySelector('img')!
     assert.equal(resized.style.width, '320px')
     assert.equal(resized.style.height, '160px')
     assert.equal(resized.style.margin, '0px auto')
     assert.equal(editor.view.dom.querySelector('img')?.style.width, '320px')
     // Existing Yjs attrs bypass HTML parsing: render must sanitize as well.
     editor.commands.updateAttributes('image', {
-      style: 'width: 25%; height: auto; margin: 0 0 0 auto; position: fixed; background: url(https://invalid.test/); width: expression(alert(1)); color: red !important;',
+      style:
+        'width: 25%; height: auto; margin: 0 0 0 auto; position: fixed; background: url(https://invalid.test/); width: expression(alert(1)); color: red !important;',
     })
     for (const html of [editor.getHTML(), docToHtml(doc)]) {
-      assert.doesNotMatch(html, /position|background|invalid.test|expression|important/)
-      assert.equal(new DOMParser().parseFromString(html, 'text/html').querySelector('img')?.style.marginLeft, 'auto')
+      assert.doesNotMatch(
+        html,
+        /position|background|invalid.test|expression|important/,
+      )
+      assert.equal(
+        new DOMParser().parseFromString(html, 'text/html').querySelector('img')
+          ?.style.marginLeft,
+        'auto',
+      )
     }
-    const imported = htmlToDoc('<img src="data:image/png;base64,YQ==" style="width: 25%; margin: 0 auto; position: fixed; background: url(https://invalid.test/)">')
+    const imported = htmlToDoc(
+      '<img src="data:image/png;base64,YQ==" style="width: 25%; margin: 0 auto; position: fixed; background: url(https://invalid.test/)">',
+    )
     try {
       const firstChild = yDocToProsemirrorJSON(imported, 'default').content?.[0]
       assert.ok(firstChild && !Array.isArray(firstChild))
       assert.equal(firstChild.attrs?.style, 'width: 25%; margin: 0 auto;')
-    } finally { imported.destroy() }
+    } finally {
+      imported.destroy()
+    }
   } finally {
     doc.off('updateV2', forward)
     editor.destroy()
@@ -500,13 +526,19 @@ test('remote two-Y.Doc paragraph replacement during image decode cancels upload 
     let collapsed = false
     editor.on('transaction', ({ transaction }) => {
       if (transaction.docChanged) {
-        const mapped = bookmark.map(transaction.mapping).resolve(transaction.doc)
+        const mapped = bookmark
+          .map(transaction.mapping)
+          .resolve(transaction.doc)
         collapsed = mapped.empty
       }
     })
     // A normal peer text edit makes this binding replace the changed paragraph.
     peer.commands.insertContentAt(1, 'Remote ')
-    assert.equal(collapsed, true, 'reproduces incompatible numeric bookmark mapping')
+    assert.equal(
+      collapsed,
+      true,
+      'reproduces incompatible numeric bookmark mapping',
+    )
     assert.deepEqual(editor.getJSON(), peer.getJSON())
     const beforeDecode = editor.getJSON()
     const beforeUpdate = Y.encodeStateAsUpdateV2(doc)
@@ -514,7 +546,10 @@ test('remote two-Y.Doc paragraph replacement during image decode cancels upload 
     await settleUploads()
     assert.deepEqual(editor.getJSON(), beforeDecode)
     assert.deepEqual(Y.encodeStateAsUpdateV2(doc), beforeUpdate)
-    assert.equal(editor.getJSON().content?.some((node) => node.type === 'image'), false)
+    assert.equal(
+      editor.getJSON().content?.some((node) => node.type === 'image'),
+      false,
+    )
     assert.equal(editor.getText(), 'Remote Before target after\n\nOther')
   } finally {
     peerDoc.off('updateV2', forward)

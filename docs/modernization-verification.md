@@ -12,7 +12,7 @@ Candidate: `liz/starter-modernization-20261106`. No production deployment.
 
 ## Review-driven fixes
 
-Independent review of the initial candidate found a pre-existing published useDocument lease bug, legacy image-style compatibility loss, insufficient concurrent-upload target coverage, and missing hook lint coverage in non-JSX TypeScript. The starter-side findings are addressed by `useDocumentLease`, shared allowlisted legacy image support, remote-replacement upload cancellation, and expanded hook lint coverage, each with regressions. No core Dexie API or protocol changes are included. Final committed-diff review is pending CodeRabbit organization reauthorization; the required auth link was sent privately to the repo owner.
+Independent review of the initial candidate found a pre-existing published useDocument lease bug, legacy image-style compatibility loss, insufficient concurrent-upload target coverage, and missing hook lint coverage in non-JSX TypeScript. The starter-side findings are addressed by `useDocumentLease`, shared allowlisted legacy image support, remote-replacement upload cancellation, and expanded hook lint coverage, each with regressions. No core Dexie API or protocol changes are included. On 2026-11-06 David explicitly waived CodeRabbit and requested a self-review instead. The final self-review covered the full diff from `2f75b9e` through `cb3dca3`, plus the final formatting/documentation changes: dependency/lockfile consistency, CI permissions and reproducibility, provider acquisition/release and hydration/error paths, editor and Awareness ownership, schema/HTML compatibility, image CSS sanitization, asynchronous paste/drop cancellation, React/MUI callers and regression coverage. No unresolved critical/high findings were identified in that review; this is a self-review, not a claim of a second independent approval.
 
 ## Final local gates
 
@@ -33,4 +33,4 @@ Full-text search was exercised through the browser's search input against an own
 
 ## Hosted CI
 
-Candidate commits are local; CodeRabbit final review is pending repo-owner reauthorization. The branch has not been pushed and no PR/hosted CI exists yet. No production deployment.
+The CI workflow checks Node.js 22 and 24 with strict-peer installation, lint, TypeScript 7, all regression tests, production build, full/production audits and ordinary-install reproducibility. Hosted results will be recorded after PR creation; local passes do not establish hosted CI success. CodeRabbit is not a delivery gate for this PR, per David's explicit instruction. No production deployment.
