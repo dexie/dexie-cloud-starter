@@ -85,5 +85,5 @@
   "engines": {
     "node": "^22.14.0 || >=24.0.0"
   },
-  "packageManager": "npm@11.21.2"
+  "packageManager": "npm@12.2.2"
 }
