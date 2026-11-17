@@ -73,13 +73,13 @@
   "overrides": {
     "postcss": "^8.5.33",
     "@typescript-eslint/typescript-estree": {
-      "minimatch": "^11.0.8"
+      "minimatch": "^11.0.9"
     },
     "eslint": {
-      "minimatch": "^11.0.8"
+      "minimatch": "^11.0.9"
     },
     "@eslint/config-array": {
-      "minimatch": "^11.0.8"
+      "minimatch": "^11.0.9"
     }
   },
   "engines": {
